@@ -1,0 +1,99 @@
+.btn_div {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 1000px;
+  min-width: 300px;
+  width: 80%;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  text-align: center;
+  font-size: 1em; }
+
+body {
+  background-color: aquamarine; }
+
+h1, h2 {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 1000px;
+  min-width: 300px;
+  width: 80%;
+  text-align: center;
+  text-decoration: underline; }
+
+form {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 1000px;
+  min-width: 300px;
+  width: 80%;
+  border: black solid 3px;
+  border-radius: 10px;
+  border-collapse: collapse;
+  text-align: center; }
+  form textarea {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 1000px;
+    min-width: 300px;
+    width: 90%;
+    height: 250px; }
+  form #otherInfo div {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    margin-bottom: 10px; }
+    form #otherInfo div span, form #otherInfo div input {
+      margin-right: 10px; }
+
+#go_to_details {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 1000px;
+  min-width: 300px;
+  width: 80%;
+  text-align: center;
+  background-color: whitesmoke; }
+
+#detail_author_div, #detail_source_div, #detail_other_div {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 1000px;
+  min-width: 300px;
+  width: 90%;
+  border: black dashed 1px;
+  border-radius: 10px;
+  border-collapse: collapse;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-size: 1.1em; }
+  #detail_author_div input, #detail_author_div select, #detail_source_div input, #detail_source_div select, #detail_other_div input, #detail_other_div select {
+    margin-bottom: 20px;
+    font-size: 1em;
+    height: 30px; }
+
+#detailSelectKindRequest {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 1000px;
+  min-width: 200px;
+  width: 40%;
+  font-size: 0.95em;
+  height: 25px;
+  line-height: 25px;
+  margin-bottom: 10px; }
+
+#until_point {
+  margin-bottom: 15px; }
+
+.if_error_div {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 1000px;
+  min-width: 300px;
+  width: 80%; }
+  .if_error_div p {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 0;
+    color: red; }
