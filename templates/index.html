@@ -1,0 +1,47 @@
+{% extends "components/base.html" %}
+  {% block title %} よく使う言葉リスト！ {% endblock %}
+      {% block scriptsrc %}
+      <script src="{{url_for('static',filename='js/index.js')}}" type="module" defer></script>
+      {% endblock %}
+    {% block main %}
+    <h1>よく使う言葉テスト！</h1>
+
+    <form id="index_form" method="post" action="/process_form">
+      {{form.hidden_tag()}}
+
+    <p>{{ form.request_sentences.label }}投稿してください</p>
+    {{ form.request_sentences }}
+
+    {% for error in form.request_sentences.errors %}
+      <div class="if_error_div"><p class="if_error_div">{{ error }}</p></div>
+    {% endfor %}
+
+
+    <div id="otherInfo">
+
+      <div class="request_inputs">
+        <span>{{ form.request_author.label }}</span>
+        {{form.request_author}}
+        {{selectForm.author_select}}
+      </div>
+
+      {% for error in form.request_author.errors %}
+        <div class="if_error_div"><p class="if_error_div">{{ error }}</p></div>
+      {% endfor %}
+
+    <div class="request_inputs">
+        <span>{{ form.request_source.label }}</span>
+        {{form.request_source}}
+        {{selectForm.source_select}}
+      </div>
+    </div>
+
+    <div class="btn_div">
+     <button>決定！</button>
+    </div>
+
+    </form>
+
+    <p id="go_to_details">現在のランクは<a href="/detail">こちら</a></p>
+
+  {% endblock %}
