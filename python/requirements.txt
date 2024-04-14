@@ -1,0 +1,8 @@
+numpy==1.26.4
+flask
+flask_wtf
+wtforms
+spacy
+libsass  # sassではなく、こちらを使用
+mysql-connector-python
+# これらはインポートするモジュール一覧

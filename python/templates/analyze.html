@@ -1,0 +1,20 @@
+{% extends "components/base.html" %}
+  {% block title %} 解析結果 {% endblock %}
+    {% block main %}
+    <div>
+      <p>以下の文面の解析を完了しました</p>
+      <p>{{sents}}</p>
+    </div>
+
+    <p>現在のランキング</p>
+    <table>
+      {% for rank in now_rank %}
+      <tr>
+        <td class="rank">{{rank.number}}位</td>
+        <td class="words">{{rank.words}}</td>
+        <td class="source">{{rank.c}}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    <p>詳細事項は<a href="/detail">こちら</a></p>
+  {% endblock %}
