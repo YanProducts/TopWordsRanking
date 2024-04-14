@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, send_from_directory,jsonify,render_template, request
 
 # flaskのcsrf対策
 from flask_wtf.csrf import CSRFProtect
@@ -18,7 +18,7 @@ from classes.error_sets.error_process import ErrorProcess
 
 import sys
 
-app=Flask(__name__)
+app=Flask(__name__,static_folder="../react_app/build")
 
 #  設定のインポート
 app.config.from_object(Config)
@@ -30,27 +30,34 @@ csrf=CSRFProtect(app)
 app.register_error_handler(InvalidColumnError,ErrorProcess.error_view)
 app.register_error_handler(SqlError,ErrorProcess.error_view)
 
-# 初期ページ
-@app.route("/")
-def index():
+# ページのルーティング
+@app.route("/",defaults={"path":"index"})
+@app.route("/{path:path}")
+def catch_all(path):
+  return send_from_directory(app.static_folder,"index.html")
 
+
+# 初期段階での変数設定
+@app.route("/api/first_data")
+def get_data_forAPI():
   # sassのコンパイル
-  Sass.compile()
-  
+  Sass.compile()  
   # インスタンスの宣言&sql接続
   sql=Sql()  
-  read=Read(sql)
   selectFormSets=MySelectForm()
   formSets=MyPostForm()
 
   # sql終了
   sql.close_process()
 
-  return render_template("index.html",form=formSets, selectForm=selectFormSets,isIndex=True)
+  return jsonify({"form":formSets, "selectForm":selectFormSets,"isIndex":True})
 
 
-# ポスト時
-@app.route("/process_form",methods=["POST"])
+
+# @app.route("/process_form",methods=["POST"])
+
+# ポスト時(fetchで操作)
+@app.route("/api/post_data")
 def when_post():
 
   # sassのコンパイル
@@ -71,10 +78,17 @@ def when_post():
     sents,author,source,now_rank=process.request_process(request)
   # sql終了
     sql.close_process()
-    return render_template("analyze.html",sents=sents,now_rank=now_rank)
+    # return render_template("analyze.html",sents=sents,now_rank=now_rank)
+
+    # 変数受け渡し
+    # 投稿後のページへのルーティングはJSXで行う
+    return jsonify({"sents":sents, "now_rank":now_rank})
+
 
   # バリデーションリターン
-  return render_template("index.html", form=formSets, selectForm=selectFormSets)
+  # return render_template("index.html", form=formSets, selectForm=selectFormSets)
+  return jsonify({"form":formSets, "selectForm":selectFormSets})
+
 
 
 # 詳細事項
