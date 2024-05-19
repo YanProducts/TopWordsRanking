@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Redirect } from 'react-router-dom';
 import './App.css';
 import Index from './Pages/Index';
 import Analyze from './Pages/Analyze';
@@ -10,13 +10,17 @@ import NotFoundPage from './Pages/NotFoundPage';
 function App() {
   return (
     <Router>
-      <Switch>
-        <Route path="index" exact component={Index}/>
-        <Route path="when_post" component={Analyze}/>
-        <Route path="detail/main" component={DetailMain}/>
-        <Route path="detail/result" component={DetailResult}/>
-      </Switch>
-    </Router>
+      <Routes>
+        <Route path="/" element={<Index/>}/>
+        <Route path="/index" exact element={<Index/>}/>
+         <Route path="/when_post" element={<Analyze/>}/>
+         <Route path="/detail/main" element={<DetailMain/>}/>
+         <Route path="/detail/result" element={<DetailResult/>}/> 
+         {/* 定義されていないパスは全てここへ */}
+        <Route path="*" element={<NotFoundPage/>}/> 
+       </Routes>
+     </Router>
+    
   );
 }
 

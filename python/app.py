@@ -1,7 +1,8 @@
 from flask import Flask, send_from_directory,jsonify,render_template, request
-
+# jsxからのアクセスを許可する
+from flask_cors import CORS
 # flaskのcsrf対策
-from flask_wtf.csrf import CSRFProtect
+from flask_wtf.csrf import CSRFProtect,generate_csrf
 # クラスをインポート
 from classes.config import Config
 from classes.modules.sql import Sql
@@ -18,13 +19,17 @@ from classes.error_sets.error_process import ErrorProcess
 
 import sys
 
-app=Flask(__name__,static_folder="../react_app/build")
+# まだこのstatic_url_pathが理解できてない
+app=Flask(__name__,static_folder="../react_app/build", static_url_path="/")
+CORS(app)
 
 #  設定のインポート
 app.config.from_object(Config)
 
 # csrfトークンの作成
 csrf=CSRFProtect(app)
+csrf.init_app(app)
+
 
 # エラーが生じた時の呼び出し
 app.register_error_handler(InvalidColumnError,ErrorProcess.error_view)
@@ -32,36 +37,52 @@ app.register_error_handler(SqlError,ErrorProcess.error_view)
 
 # ページのルーティング
 @app.route("/",defaults={"path":"index"})
-@app.route("/{path:path}")
+
 def catch_all(path):
   return send_from_directory(app.static_folder,"index.html")
 
 
-# 初期段階での変数設定
-@app.route("/api/first_data")
+# 初期段階での変数設定。jsx側からfetchで行われる
+@app.route("/api/first_data",methods=["POST"])
+
 def get_data_forAPI():
-  # sassのコンパイル
-  Sass.compile()  
+  fromURL=request.get_json()
+
+  if not fromURL or not "fromIndex":
+    print("a")
+    # エラーをjsonで返す！
+    return jsonify({"error":"不正なアクセスです"}),400
+
+
   # インスタンスの宣言&sql接続
-  sql=Sql()  
-  selectFormSets=MySelectForm()
-  formSets=MyPostForm()
+  sql=Sql()
+  # トークンを渡す
+  token=generate_csrf()
+  
+   # これまでのデータ取得
+  existedAuthors = {i: value[0] for i, value in enumerate(MySelectForm.author_choices)}
+  existedSources = {i: value[0] for i, value in enumerate(MySelectForm.source_choices)}
 
   # sql終了
   sql.close_process()
 
-  return jsonify({"form":formSets, "selectForm":selectFormSets,"isIndex":True})
+
+  return jsonify({
+    "token":token,
+    "isIndex":True,
+    "authors":existedAuthors,
+    "sources":existedSources
+    })
+# 特定のfunctionをcsrfを無効化(APIのため)
+csrf.exempt(get_data_forAPI)
 
 
-
-# @app.route("/process_form",methods=["POST"])
 
 # ポスト時(fetchで操作)
-@app.route("/api/post_data")
+@app.route("/api/post_data",methods=["POST"])
 def when_post():
 
-  # sassのコンパイル
-  Sass.compile()
+  # tokenの検証とバリデーションは必要
 
   # インスタンスの宣言 & sql有効化
   sql=Sql()
@@ -78,7 +99,6 @@ def when_post():
     sents,author,source,now_rank=process.request_process(request)
   # sql終了
     sql.close_process()
-    # return render_template("analyze.html",sents=sents,now_rank=now_rank)
 
     # 変数受け渡し
     # 投稿後のページへのルーティングはJSXで行う
@@ -120,4 +140,4 @@ def detail_each():
 
 if __name__=="__main__":
   #  設定のインポート
-  app.run(debug=app.config["DEBUG_MODE"],port=app.config["USE_PORT"])
+  app.run(debug=app.config["DEBUG_MODE"],host=app.config["USE_HOST"], port=app.config["USE_PORT"])

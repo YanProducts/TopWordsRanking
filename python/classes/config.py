@@ -11,6 +11,7 @@ class Config:
   # デバック系統
   DEBUG_MODE=True
   USE_PORT=5001
+  USE_HOST='127.0.0.1'
 
   # csrfトークンに必要なキー
   SECRET_KEY="CSRF_KEY"
