@@ -39,6 +39,7 @@ app.register_error_handler(SqlError,ErrorProcess.error_view)
 @app.route("/",defaults={"path":"index"})
 
 def catch_all(path):
+
   return send_from_directory(app.static_folder,"index.html")
 
 
@@ -49,7 +50,7 @@ def get_data_forAPI():
   fromURL=request.get_json()
 
   if not fromURL or not "fromIndex":
-    print("a")
+
     # エラーをjsonで返す！
     return jsonify({"error":"不正なアクセスです"}),400
 
@@ -67,11 +68,12 @@ def get_data_forAPI():
   sql.close_process()
 
 
+
   return jsonify({
     "token":token,
     "isIndex":True,
     "authors":existedAuthors,
-    "sources":existedSources
+    "sources":existedSources,
     })
 # 特定のfunctionをcsrfを無効化(APIのため)
 csrf.exempt(get_data_forAPI)
@@ -89,25 +91,31 @@ def when_post():
   read=Read(sql)
   post=Post(sql)
   jpn=Ginza()
-  formSets=MyPostForm()
   selectFormSets=MySelectForm()
   process=Process(jpn,read,post)
 
+  # データの受け取り
+  postData=request.get_json()
+
+  # flaskFormを呼び出す
+  form=MyPostForm(data=postData)
+
   # バリデーション
-  if formSets.validate_on_submit():
+  # どこかで引っ掛かってる
+  if not form.validate():
+    # バリデーションリターンは400エラー
+    return jsonify({"allErrors":form.errors}),400
+
   # 問題なければ登録
-    sents,author,source,now_rank=process.request_process(request)
-  # sql終了
-    sql.close_process()
+  sentence,author,source,now_rank=process.request_process(postData)
+  # # sql終了
+  sql.close_process()
+  return jsonify({"rank":now_rank,"author":author,"sentence":sentence,"source":source})
 
     # 変数受け渡し
     # 投稿後のページへのルーティングはJSXで行う
-    return jsonify({"sents":sents, "now_rank":now_rank})
+    # return jsonify({"sents":sents, "now_rank":now_rank})
 
-
-  # バリデーションリターン
-  # return render_template("index.html", form=formSets, selectForm=selectFormSets)
-  return jsonify({"form":formSets, "selectForm":selectFormSets})
 
 
 

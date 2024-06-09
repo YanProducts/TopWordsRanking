@@ -13,9 +13,10 @@ class Process:
 
   # リクエストの際の処理
   def request_process(self,request):
-    sentsbase=request.form.get("request_sentences")
-    author=request.form.get("request_author")
-    source=request.form.get("request_source")
+    sentsbase=request.get("request_sentences")
+    author=request.get("request_author")
+    source=request.get("request_source")
+    # sentsbase=request.form.get("request_sentences")
     # 解析
     sents=self._jpn.jpn_analyze(sentsbase)
     # 解析した言葉を格納

@@ -1,7 +1,14 @@
-import { Helmet } from 'react-helmet';
-import React from 'react';
+import { Helmet, HelmetProvider } from 'react-helmet-async'
+import React, { useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { ComponentsForPost } from './Components/Index/ForPost';
 
 export default function Index(){
+  // ページ遷移用
+  const navigate=useNavigate();
+
+ // 初期データの設定
   const [defaults,setDefault]=React.useState({
     "token":"",
     "authors":{},
@@ -25,12 +32,14 @@ export default function Index(){
     ).then((response)=>{
       if(!response.ok){
         console.log(response)
+        // エラーページへ
+        navigate("");
+        
         return;
       }else{
        return response.json();
       }
     }).then((json)=>{
-      console.log(json)
       setDefault({
         "token":json.token,
         "authors":json.authors,
@@ -58,102 +67,141 @@ export default function Index(){
   },[defaults])   
   
   // 投稿の各データ
-  const [author,setAuthor]=React.useState("選択してください");
-  const [source,setSource]=React.useState("選択してください");
+  const [author,setAuthor]=React.useState("");
+  const [source,setSource]=React.useState("");
+  const [text,setText]=React.useState("");
+
+  // input要素のref
+  const AuthorInputRef=React.useRef(null);
+  const SourceInputRef=React.useRef(null);
 
   // 各データのselect要素のチェンジ
-  const onAuthorSelectChange=(e)=>{
+  // useCallbackを使うことで、その部位以外はレンダリングさせない
+  const onAuthorSelectChange=React.useCallback((e)=>{
     setAuthor(e.target.value)
-  }
-  const onSourceSelectChange=(e)=>{
+  },[])
+
+  const onSourceSelectChange=React.useCallback((e)=>{
     setSource(e.target.value)
-  }
+  },[])
+
   // 各データのinput要素のチェンジ
-  const onAuthorInputChange=(e)=>{
-    setAuthor(e.target.value)
-  }
-  const onSourceInputChange=(e)=>{
+  // useCallbackを使うことで、その部位以外はレンダリングさせない
+  const onAuthorInputChange=React.useCallback((e)=>{
+    setAuthor(e.target.value)    
+    AuthorInputRef.current.focus({preventScroll: true })
+   },[])
+  const onSourceInputChange=React.useCallback((e)=>{
     setSource(e.target.value)
+    SourceInputRef.current.focus({preventScroll: true })
+    }, [])
+
+  // textareaのチェンジ
+  const onTextAreaChange=(e)=>{
+    setText(e.target.value)
   }
 
+  // エラーのセッティング
+  const [error,setError]=React.useState({
+    "validationError":{},
+    "otherErrors":""
+  });
 
 
 
   // 投稿ボタンが押されたとき
   const onBtnClick=(e)=>{
-    e.preventdefault();
+    e.preventDefault();
     const headers={
       "Content-Type":"application/json",
-      "csrf_token":defaults.token
+      "X-CSRFToken":defaults.token
     }
+
+
     fetch(
       "api/post_data",{
         method:"post",
         headers:headers,
         body:JSON.stringify({
-
+          "request_sentences":text,
+          "request_author":author,
+          "request_source":source
         })
       }
-    )
+    ).then((response)=>{
+      // 投稿エラー時
+      if(!response.ok){
+        // バリデーションエラー
+        if(response.status===400){
+          return response.json().then((validationErrors)=>{
+            setError({
+              "validationError":validationErrors.allErrors,
+              "otherErrors":""
+            })
+            // setErrorの設定が終わるまでには時間がかかる
+
+
+            throw new Error("")
+          })
+        }else{
+          console.log(response.json())
+        // バリデーション以外のエラー
+          throw new Error(response);
+        }
+
+      }
+      return response.json()
+    }).then((json)=>{
+      console.log(json.a)
+      // ページ遷移
+      navigate("/when_post");
+
+    }).catch((e)=>{
+      // ローカルと本番で分ける!!!!!!!!!!!!!!!!!!
+      // console.error("エラー",e)
+      
+    })
   }
 
 
-  // 投稿の要素に関するcomponent
-  const ComponentsForPost=()=>{
-    return(
-      <form id="index_form" method="post" action="/process_form">
-         <p>文面を投稿してください</p>
-        <textarea>
   
-        </textarea>
-
-
-  <div id="otherInfo">
-
-    <div class="request_inputs">
-      <span>筆者</span>
-      <input onChange={onAuthorInputChange} value={author}/>
-      <select onChange={onAuthorSelectChange}>
-        {authorOptions}
-      </select>
-    </div>
-
-
-    <div>
-    <span>媒体</span>
-      <input onChange={onSourceInputChange} value={source}/>
-      <select onChange={onSourceSelectChange}>
-      {sourceOptions}
-      </select>
-    </div>
-  </div>
-        <div>
-          <button onClick={onBtnClick}>決定！</button>
-          </div>
-      </form>
-    )
-  }
-
-
 
   return(
     <>
+     <HelmetProvider>
       <Helmet>
         <title>よく使う言葉リスト！</title>
-        <link type="stylesheet" href="../App.css"></link>
       </Helmet>
 
-        <h1>よく使う言葉リスト！</h1>
-      {ComponentsForPost()}
+        {/* 空白防止用 */}
+        <div>　</div>
+        <h1 className="base_h1">よく使う言葉リスト！</h1>
+      <ComponentsForPost
+        error={error}
+        text={text}
+        author={author}
+        source={source}
+        authorOptions={authorOptions}
+        sourceOptions={sourceOptions}
+        onTextAreaChange={onTextAreaChange}
+        onAuthorInputChange={onAuthorInputChange}
+        onSourceInputChange={onSourceInputChange}
+        onAuthorSelectChange={onAuthorSelectChange}
+        onSourceSelectChange={onSourceSelectChange}
+        AuthorInputRef={AuthorInputRef}
+        SourceInputRef={SourceInputRef}
+        onBtnClick={onBtnClick}
+      />
 
-        {/*rm.request_sentences.errors %}
-      <div class="if_error_div"><p class="if_error_div">{{ error }}</p></div>
-    {% endfor %} */}
+
 
 
     
-        <p id="go_to_details">現在のランクは<a href="/detail">こちら</a></p>
+        <p className='base_link_p'>現在のランクは<Link className='base_link' href="/detail">こちら</Link></p>
 
+        {/* 空白防止用 */}
+        <div>　</div>
+      </HelmetProvider>
     </>
   )
 

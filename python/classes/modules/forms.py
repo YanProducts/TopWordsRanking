@@ -13,11 +13,11 @@ import datetime
 class MyPostForm(FlaskForm):
   # post投稿
   # バリデーション必要
-  request_sentences=TextAreaField("文面",validators=[DataRequired(message="文面は入力必須です"),Length(max=10000, min=5, message="文面は3文字以上10000字以内です")])
+  request_sentences=TextAreaField(validators=[DataRequired(message="文面は入力必須です"),Length(max=10000, min=5, message="文面は5文字以上10000字以内です")])
 
-  request_author=StringField("筆者",id="author_input",validators=[DataRequired(message="筆者名は必須です"),Length(max=100, message="筆者名は100文字以内")])
+  request_author=StringField(validators=[DataRequired(message="筆者名は必須です"),Length(max=100, message="筆者名は100文字以内")])
   
-  request_source=StringField("媒体",id="source_input", validators=[DataRequired(message="媒体は必須です"),Length(max=100, message="媒体名は100文字以内")])
+  request_source=StringField(validators=[DataRequired(message="媒体は必須です"),Length(max=100, message="媒体名は100文字以内")])
   
 
 class MySelectForm(FlaskForm):
