@@ -16,14 +16,15 @@ class Process:
     sentsbase=request.get("request_sentences")
     author=request.get("request_author")
     source=request.get("request_source")
-    # sentsbase=request.form.get("request_sentences")
+
     # 解析
     sents=self._jpn.jpn_analyze(sentsbase)
+
     # 解析した言葉を格納
     self._post.insert_words(sents,author,source)
 
     # データ挿入後のランキングを返す
-    return (sentsbase,author,source,self._read.get_rank("words"))
+    return (sentsbase,author,source,self._read.get_rank("words"),sents)
       
 
         # 詳細データを返す処理

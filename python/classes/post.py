@@ -12,11 +12,9 @@ class Post:
     # データが存在し、かつrequest_wordと同じ時はカウントをプラス
     try:
       sql.open_process()
-      for sent in sentences:
-        for token in sent:
-          word=token.orth_
-          sql._cur.execute("insert into py_access(words,author,source) values(%s, %s, %s)",(word, author, source))
-          sql._con.commit()
+      for word in sentences:
+        sql._cur.execute("insert into py_access(words,author,source) values(%s, %s, %s)",(word, author, source))
+        sql._con.commit()
     except Exception as e:
       sql.all_close()
       # raise SqlError("投稿処理のエラーです")

@@ -2,7 +2,7 @@ from flask import Flask, send_from_directory,jsonify,render_template, request
 # jsxからのアクセスを許可する
 from flask_cors import CORS
 # flaskのcsrf対策
-from flask_wtf.csrf import CSRFProtect,generate_csrf
+from flask_wtf.csrf import CSRFProtect,CSRFError,generate_csrf
 # クラスをインポート
 from classes.config import Config
 from classes.modules.sql import Sql
@@ -29,55 +29,61 @@ app.config.from_object(Config)
 # csrfトークンの作成
 csrf=CSRFProtect(app)
 csrf.init_app(app)
+# CSRFトークンアウトの際の処理
+@app.errorhandler(CSRFError)
+def whenCSRFError(e):
+  response=jsonify({
+    "error":"不正な処理です"
+  })
+  # CSRF設定を410番に定義
+  response.status_code=410
+  return response
 
 
-# エラーが生じた時の呼び出し
-app.register_error_handler(InvalidColumnError,ErrorProcess.error_view)
-app.register_error_handler(SqlError,ErrorProcess.error_view)
+# # エラーが生じた時の呼び出し
+# app.register_error_handler(InvalidColumnError,ErrorProcess.error_view)
+# app.register_error_handler(SqlError,ErrorProcess.error_view)
 
-# ページのルーティング
+# 全体のページのルーティング
 @app.route("/",defaults={"path":"index"})
-
 def catch_all(path):
-
   return send_from_directory(app.static_folder,"index.html")
 
 
 # 初期段階での変数設定。jsx側からfetchで行われる
 @app.route("/api/first_data",methods=["POST"])
-
 def get_data_forAPI():
-  fromURL=request.get_json()
 
-  if not fromURL or not "fromIndex":
+  # 不正なアクセス対策
+  default_data=request.get_json()
+  default_pass=default_data.get("defaultPass")
+  fromURL=default_data.get("fromURL")
 
-    # エラーをjsonで返す！
+  # 不正なアクセスエラーをjsonで返す！
+  if not fromURL or not "fromIndex" or not default_pass == app.config["DEFAULT_PASS"]:
     return jsonify({"error":"不正なアクセスです"}),400
-
 
   # インスタンスの宣言&sql接続
   sql=Sql()
   # トークンを渡す
   token=generate_csrf()
-  
-   # これまでのデータ取得
+     # これまでのデータ取得
   existedAuthors = {i: value[0] for i, value in enumerate(MySelectForm.author_choices)}
   existedSources = {i: value[0] for i, value in enumerate(MySelectForm.source_choices)}
 
   # sql終了
   sql.close_process()
 
-
-
   return jsonify({
     "token":token,
     "isIndex":True,
     "authors":existedAuthors,
     "sources":existedSources,
+    "env_type":app.config["ENV_TYPE"]
     })
+
 # 特定のfunctionをcsrfを無効化(APIのため)
 csrf.exempt(get_data_forAPI)
-
 
 
 # ポスト時(fetchで操作)
@@ -106,16 +112,13 @@ def when_post():
     # バリデーションリターンは400エラー
     return jsonify({"allErrors":form.errors}),400
 
+
   # 問題なければ登録
-  sentence,author,source,now_rank=process.request_process(postData)
+  sentence,author,source,now_rank,now_ginza_sets=process.request_process(postData)
+
   # # sql終了
   sql.close_process()
-  return jsonify({"rank":now_rank,"author":author,"sentence":sentence,"source":source})
-
-    # 変数受け渡し
-    # 投稿後のページへのルーティングはJSXで行う
-    # return jsonify({"sents":sents, "now_rank":now_rank})
-
+  return jsonify({"rank":now_rank,"author":author,"sentence":sentence,"source":source,"now_ginza_sets":now_ginza_sets})
 
 
 

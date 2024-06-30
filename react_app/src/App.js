@@ -5,6 +5,7 @@ import Index from './Pages/Index';
 import Analyze from './Pages/Analyze';
 import DetailMain from './Pages/Details/Main';
 import DetailResult from './Pages/Details/Result';
+import ShowErrorPage from "./Pages/Error";
 import NotFoundPage from './Pages/NotFoundPage';
 import BaseLayout from "./Pages/Components/Layout";
 
@@ -15,12 +16,13 @@ function App() {
         {/* レイアウト */}
         <Route path="/" element={<BaseLayout />}>
           {/* 各ページ */}
-            <Route Index element={<Index/>}/>
-            <Route path="/index" exact element={<Index/>}/>
+            <Route index element={<Index/>}/>
+            <Route path="/index" element={<Index/>}/>
             <Route path="/when_post" element={<Analyze/>}/>
             <Route path="/detail/main" element={<DetailMain/>}/>
             <Route path="/detail/result" element={<DetailResult/>}/> 
             {/* 定義されていないパスは全てここへ */}
+            <Route path="/error" element={<ShowErrorPage/>}/> 
             <Route path="*" element={<NotFoundPage/>}/> 
         </Route>
        </Routes>

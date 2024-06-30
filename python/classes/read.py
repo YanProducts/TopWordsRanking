@@ -31,10 +31,6 @@ class Read:
 
   # ランキングの取得（詳細条件別）
   def get_filteredRank(self,author,source,start_date_str,end_date_str):
-    # print(author)
-    # print(source)
-    # print(start_date_str)
-    # print(end_date_str)
     sql=self._sql
     sql.open_process()
     try:
@@ -73,6 +69,7 @@ class Read:
       else:
         r["number"]=before_rank
         # 必然的に前のカウントはそのまま、前の順位もそのまま
+      r["id"]=default_rank
       default_rank += 1
     return rank
     

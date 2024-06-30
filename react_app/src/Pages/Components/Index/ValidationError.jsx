@@ -20,7 +20,7 @@ export const ValidationErrorComponent=({content,error})=>{
     // 前回の値を削除
     setAnimationClass("")
     // その後に、新たにアニメーションをセット
-    setTimeout(()=>{setAnimationClass("animate-disppear")},0)
+    setTimeout(()=>{setAnimationClass("animate-disappear")},0)
    }
   },[error]) 
   
