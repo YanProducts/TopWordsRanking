@@ -1,7 +1,6 @@
 import { Helmet, HelmetProvider } from 'react-helmet-async'
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
+import { Link,useNavigate  } from 'react-router-dom';
 import { ComponentsForPost } from './Components/Index/ForPost';
 import { DefaultSetting } from './Components/Index/DefaultSetting';
 import IndexPostFetch from './Components/Fetch/IndexPostFetch';
@@ -101,7 +100,7 @@ export default function Index(){
         onBtnClick={onBtnClick}
       />
     
-        <p className='base_link_p'>現在のランクは<Link className='base_link' href="/detail">こちら</Link></p>
+        <p className='base_link_p'>現在のランクは<Link className='base_link' to="/detail/main">こちら</Link></p>
 
         {/* 空白防止用 */}
         <div>　</div>

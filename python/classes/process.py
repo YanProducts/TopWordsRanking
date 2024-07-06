@@ -1,6 +1,7 @@
 from flask import render_template, request
 from classes.modules.forms import MyPostForm
 from classes.modules.forms import MySelectForm
+from datetime import datetime
 
 
 class Process:
@@ -28,24 +29,37 @@ class Process:
       
 
         # 詳細データを返す処理
-  def get_detail_results(self,request):
+  def get_detail_defaults(self):
 
       # 筆者
-      author=request.form.get("detail_author")
+      authors_choices=[r["author"] for r in self._read.get_rank("author")]
+      
       # 媒体
-      source=request.form.get("detail_source")
+      sources_choices=[r["source"] for r in self._read.get_rank("source")]
+    
+      # 日付(開始も終了も、この段階では同じ)
+      default_year_sets=[n for n in range(2024, datetime.now().year+1)]
+      default_month_sets=[n for n in range(1, 13)]
+      default_day_sets=[n for n in range(1, 32)]
 
-      # 日付
-      start_year=request.form.get("detail_start_year")
-      start_month=request.form.get("detail_start_month")
-      start_day=request.form.get("detail_start_day")
-      end_year=request.form.get("detail_end_year")
-      end_month=request.form.get("detail_end_month")
-      end_day=request.form.get("detail_end_day")
+      return{
+       "authors":authors_choices,
+       "sources":sources_choices,
+       "years":default_year_sets,
+       "months":default_month_sets,
+       "days":default_day_sets,
+      }
+
+
+
+        # 詳細データを返す処理
+  def get_detail_base(self,request):
+     return "a"
+      # request取得
 
       # sql比較型に直す
-      start_date_str=f"{start_year}-{start_month}-{start_day}"
-      end_date_str=f"{end_year}-{end_month}-{end_day}"
-      
-      # # 条件に合うリクエスト取得
-      return self._read.get_filteredRank(author,source,start_date_str,end_date_str)
+      # start_date_str=f"{start_year}-{start_month}-{start_day}"
+      # end_date_str=f"{end_year}-{end_month}-{end_day}"
+
+      # # # 条件に合うリクエスト取得
+      # return self._read.get_filteredRank(author,source,start_date_str,end_date_str)

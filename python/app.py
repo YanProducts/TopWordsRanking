@@ -40,10 +40,6 @@ def whenCSRFError(e):
   return response
 
 
-# # エラーが生じた時の呼び出し
-# app.register_error_handler(InvalidColumnError,ErrorProcess.error_view)
-# app.register_error_handler(SqlError,ErrorProcess.error_view)
-
 # 全体のページのルーティング
 @app.route("/",defaults={"path":"index"})
 def catch_all(path):
@@ -52,15 +48,19 @@ def catch_all(path):
 
 # 初期段階での変数設定。jsx側からfetchで行われる
 @app.route("/api/first_data",methods=["POST"])
+# csrf無効化
+@csrf.exempt
 def get_data_forAPI():
+  
+  # データ取得
+  default_data=request.get_json()
 
   # 不正なアクセス対策
-  default_data=request.get_json()
   default_pass=default_data.get("defaultPass")
   fromURL=default_data.get("fromURL")
 
   # 不正なアクセスエラーをjsonで返す！
-  if not fromURL or not "fromIndex" or not default_pass == app.config["DEFAULT_PASS"]:
+  if not fromURL or not fromURL=="fromIndex" or not default_pass == app.config["DEFAULT_PASS"]:
     return jsonify({"error":"不正なアクセスです"}),400
 
   # インスタンスの宣言&sql接続
@@ -82,8 +82,7 @@ def get_data_forAPI():
     "env_type":app.config["ENV_TYPE"]
     })
 
-# 特定のfunctionをcsrfを無効化(APIのため)
-csrf.exempt(get_data_forAPI)
+
 
 
 # ポスト時(fetchで操作)
@@ -121,16 +120,37 @@ def when_post():
   return jsonify({"rank":now_rank,"author":author,"sentence":sentence,"source":source,"now_ginza_sets":now_ginza_sets})
 
 
-
-# 詳細事項
-@app.route("/detail")
+# 詳細事項の初期情報取得
+@app.route("/api/detail_first_data",methods=["POST"])
+# csrf無効化
+@csrf.exempt
 def detail_view():
-  Sass.compile()
-  detailFormSets=DetailForm()
-  return render_template("details/main.html",form=detailFormSets)
+  sql=Sql()
+  read=Read(sql)
+  post=Post(sql)
+  jpn=Ginza()
+  process=Process(jpn,read,post)
+  
+  # データ取得
+  default_data=request.get_json()
+
+  # 不正なアクセス対策
+  default_pass=default_data.get("defaultPass")
+  fromURL=default_data.get("fromURL")
+
+  # 不正なアクセスエラーをjsonで返す！
+  if not fromURL or not fromURL== "main" or not default_pass == app.config["DEFAULT_PASS"]:
+    return jsonify({"error":"不正なアクセスです"}),400
+  
+  # tokenの設定
+  token=generate_csrf()
+
+  defaultData={**process.get_detail_defaults(),"token":token}
+
+  return jsonify(defaultData)
 
 
-# 詳細情報の投稿
+# 詳細情報の
 @app.route("/detail_each", methods=["POST"])
 def detail_each():
   sql=Sql()
