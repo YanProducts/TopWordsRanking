@@ -1,0 +1,8 @@
+python/classes/config.py
+python/practice.txt
+python/classes/*__pycache__/
+python/venv/
+react_app/.env
+react_app/node_modules/
+.vscode/
+a.txt

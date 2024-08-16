@@ -1,0 +1,18 @@
+# 設定用のクラス
+# 各々の状況に基づき記入
+# app.config.from_object()で呼び出す
+
+class Config:
+
+  # sql
+  HOST=""
+  DATABASE=""
+  DBUSER=""
+  DBPASS=""
+  
+  # デバック系統
+  DEBUG_MODE=
+  USE_PORT=
+
+  # csrfトークンに必要なキー
+  SECRET_KEY=""

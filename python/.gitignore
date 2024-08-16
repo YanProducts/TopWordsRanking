@@ -1,0 +1,4 @@
+classes/config.py
+practice.txt
+classes/*__pycache__/
+venv/

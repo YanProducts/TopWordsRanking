@@ -1,0 +1,67 @@
+/* src/styles.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@layer components{
+  .base_backColor{
+    @apply bg-white bg-opacity-80
+  }
+  .base_body{
+    @apply bg-sky-300 w-full min-h-screen
+  }
+  .base_frame {
+    @apply w-4/5 min-w-[300px] max-w-[1000px] mx-auto;
+  }
+  .base_h{
+    @apply text-center font-bold base_backColor base_frame
+  }
+  .base_h1{
+    @apply base_h text-3xl mb-10
+  }
+  .base_p{
+    @apply text-center font-bold base_backColor base_frame my-2 text-lg
+  }
+
+
+  .base_table{
+    @apply base_backColor w-4/5 mt-5 mb-5 border-black border-2
+  }
+
+  .base_td_notRightEnd{
+    @apply border-black border-r-2 w-1/4
+  }
+  .base_td_rightEnd{
+    @apply w-1/2
+  }
+  
+  .base_inputAndOption_div{
+    @apply w-full min-w-[300px] flex space-x-1.5 h-8 my-2 
+  }
+
+  .base_spanInInputSes_div{
+    @apply w-1/6 min-w-[40px] base_backColor text-center font-bold flex justify-center items-center
+  }
+  
+  .base_btn_div{
+    @apply base_frame my-2 
+  }
+
+  .base_btn{
+    @apply block bg-gray-200 p-1 rounded-sm mx-auto text-center hover:cursor-pointer
+    active:translate-y-1
+  }
+
+  .base_error{
+    @apply  bg-pink-50 text-red-600 font-bold text-center border-y-2 border-black my-0 overflow-hidden
+  }
+
+  .base_link_p{
+    @apply text-center my-2   bg-white bg-opacity-80 base_frame w-1/5  p-0.5 
+  }
+  
+  .base_link{
+    @apply  font-semibold  cursor-pointer text-blue-600 border-b-2 border-blue-600  inline-block active:translate-y-1
+  }
+  }
