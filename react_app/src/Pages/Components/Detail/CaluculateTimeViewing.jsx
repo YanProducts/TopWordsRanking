@@ -33,7 +33,6 @@ const getDefaultTimeSets=()=>{
     })
   }else{
     // 何もしない？エラー
-    console.log(what)
   }
 
     // 現在選択されているendが新しいendリストに含まれるか(初期状態は0)
@@ -48,8 +47,88 @@ const getDefaultTimeSets=()=>{
     return[updateOptions,newUpdateSelectedIndex];
  }
 
-const monthSetting=()=>{
 
+//  前の月のセッティング
+const startMonthSetting=(updateOptions,timeSets,oldSearchTime,newUpdateSelectedIndex)=>{
+      // 前の月以外を操った場合＝「後」より大きい「前」を消す
+        updateOptions.startMonths=timeSets.months.filter((month)=>{
+            return month<=oldSearchTime.endMonth
+          })
+        // 現在選択されているstartが新しいstartリストに含まれるか(初期状態は0)
+        newUpdateSelectedIndex.startMonths=0;
+        updateOptions["startMonths"].some((startMonth,index)=>{
+          if(oldSearchTime.startMonth==startMonth){
+            newUpdateSelectedIndex.startMonths=index;
+            return true;
+          }
+          return false;
+        })
+        return[updateOptions,newUpdateSelectedIndex];
+  }
+
+  // 後の月のセッティング
+  const endMonthSetting=(what,updateOptions,timeSets,oldSearchTime,newUpdateSelectedIndex)=>{
+        // 後の月以外を操った場合＝「前」より小さい「後」を消す
+         // 変更がstartMonthの時はstartMonthに合わせて要素を変更 
+         if(what==="startMonth"){
+           updateOptions["endMonths"]=timeSets.months.filter((month)=>{
+             return month>=oldSearchTime.startMonth
+            })
+            // 変更がstartMonthでない場合は直前のupdateOptionsに合わせて要素を変更(startMonthが既にendMonthに合わせて変更されている可能性)
+        }else{
+            updateOptions.endMonths=timeSets.months.filter((month)=>{
+              return month>=updateOptions.startMonths[newUpdateSelectedIndex.startMonths]
+            })
+        }
+        // 現在選択されているendが新しいendリストに含まれるか(初期状態は0)
+        newUpdateSelectedIndex.endMonths=0;
+        updateOptions.endMonths.some((endMonth,index)=>{
+          if(oldSearchTime.endMonth==endMonth){
+            newUpdateSelectedIndex.endMonths=index;
+            return true;
+           }
+           return false;
+          })
+        return[updateOptions,newUpdateSelectedIndex]
+}
+
+// 開始日のセッティング
+const startDaySetting=(updateOptions,timeSets,oldSearchTime,newUpdateSelectedIndex)=>{
+
+  updateOptions.startDays=timeSets.days.filter((day)=>{
+    return day<=oldSearchTime.endDay;
+  })
+  // 現在選択されているstartが新しいstartリストに含まれるか(初期状態は0)
+  newUpdateSelectedIndex.startDays=0;
+  updateOptions.startDays.forEach((startDay,index)=>{
+    if(oldSearchTime.startDay==startDay){
+      newUpdateSelectedIndex.startDays=index;
+      return;
+    }
+  })
+  return [updateOptions,newUpdateSelectedIndex];
+}
+
+// 終了日のセッティング
+const endDaySetting=(what,updateOptions,timeSets,oldSearchTime,newUpdateSelectedIndex)=>{
+      // 変更がstartMonthでない場合は直前のupdateOptionsに合わせて要素を変更 
+      if(what==="startDay"){
+        updateOptions.endDays=timeSets.days.filter((day)=>{
+          return day>=oldSearchTime.startDay
+        })
+      }else{
+          updateOptions.endDays=timeSets.days.filter((day)=>{
+            return day>=updateOptions.startDays[newUpdateSelectedIndex.startDays]
+          })
+      }
+      newUpdateSelectedIndex.endDays=0;
+      updateOptions.endDays.forEach((endDay,index)=>{
+        if(oldSearchTime.endDay==endDay){
+          newUpdateSelectedIndex.endDays=index;
+          return;
+        }
+      })
+  return [updateOptions,newUpdateSelectedIndex];
 }
 
 
@@ -79,83 +158,29 @@ export function CaluculateTimeViewing(what,oldSearchTime,setSearchTime,optionSet
       
     // ③もしendとstartの年が同じになった場合＝endのstartの月より前を消し、startより前のendを消す  
     if(oldSearchTime.startYear==oldSearchTime.endYear){
-
-      // 前の月以外を操った場合＝「後」より大きい「前」を消す
+      
+      // Monthの処理。
+      // option変更が開始月ではない時
       if(what!=="startMonth"){
-        updateOptions.startMonths=timeSets.months.filter((month)=>{
-            return month<=oldSearchTime.endMonth
-          })
-        // 現在選択されているstartが新しいstartリストに含まれるか(初期状態は0)
-        newUpdateSelectedIndex.startMonths=0;
-        updateOptions["startMonths"].forEach((startMonth,index)=>{
-          if(oldSearchTime.startMonth==startMonth){
-            newUpdateSelectedIndex.startMonths=index;
-            return;
-          }
-        })
-       }
+        [updateOptions,newUpdateSelectedIndex]=startMonthSetting(updateOptions,timeSets,oldSearchTime,newUpdateSelectedIndex)
+     }
 
-      // 後の月以外を操った場合＝「前」より小さい「後」を消す
-       if(what!=="endMonth"){
-         // 変更がstartMonthの時はstartMonthに合わせて要素を変更 
-         if(what==="startMonth"){
-           updateOptions["endMonths"]=timeSets.months.filter((month)=>{
-             return month>=oldSearchTime.startMonth
-            })
-            // 変更がstartMonthでない場合は直前のupdateOptionsに合わせて要素を変更(startMonthが既にendMonthに合わせて変更されている可能性)
-        }else{
-            updateOptions.endMonths=timeSets.months.filter((month)=>{
-              return month>=updateOptions.startMonths[newUpdateSelectedIndex.startMonths]
-            })
-        }
-        // 現在選択されているendが新しいendリストに含まれるか(初期状態は0)
-        newUpdateSelectedIndex.endMonths=0;
-        updateOptions.endMonths.forEach((endMonth,index)=>{
-          if(oldSearchTime.endMonth==endMonth){
-            newUpdateSelectedIndex.endMonths=index;
-            return;
-           }
-          })
-        }
-
+      // option変更が開始月ではない時
+      if(what!=="endMonth"){
+          [updateOptions,newUpdateSelectedIndex]=endMonthSetting(what,updateOptions,timeSets,oldSearchTime,newUpdateSelectedIndex)
+      }
 
       // ③②でさらにendとstartの月が同じになった場合＝endのstartの月より前を消し、startより前のendを消す
       if(oldSearchTime.startMonth==oldSearchTime.endMonth){
         
           // 動かしたのが開始日ではない場合は開始日を終了日に合わせる
           if(what!=="startDay"){
-            updateOptions.startDays=timeSets.days.filter((day)=>{
-                return day<=oldSearchTime.endDay;
-              })
-            // 現在選択されているstartが新しいstartリストに含まれるか(初期状態は0)
-            newUpdateSelectedIndex.startDays=0;
-            updateOptions.startDays.forEach((startDay,index)=>{
-              if(oldSearchTime.startDay==startDay){
-                newUpdateSelectedIndex.startDays=index;
-                return;
-              }
-            })
+            [updateOptions,newUpdateSelectedIndex]=startDaySetting(updateOptions,timeSets,oldSearchTime,newUpdateSelectedIndex)
           }
           
           // 動かしたのが終了日ではない場合は終了日を開始日に合わせる
           if(what!=="endDay"){
-            // 変更がstartMonthでない場合は直前のupdateOptionsに合わせて要素を変更 
-            if(what==="startDay"){
-              updateOptions.endDays=timeSets.days.filter((day)=>{
-                return day>=oldSearchTime.startDay
-              })
-            }else{
-                updateOptions.endDays=timeSets.days.filter((day)=>{
-                  return day>=updateOptions.startDays[newUpdateSelectedIndex.startDays]
-                })
-            }
-            newUpdateSelectedIndex.endDays=0;
-            updateOptions.endDays.forEach((endDay,index)=>{
-              if(oldSearchTime.endDay==endDay){
-                newUpdateSelectedIndex.endDays=index;
-                return;
-              }
-           })
+            [updateOptions,newUpdateSelectedIndex]=endDaySetting(what,updateOptions,timeSets,oldSearchTime,newUpdateSelectedIndex);
           }    
           
         // 違う月だった時（違う月に戻った時）
