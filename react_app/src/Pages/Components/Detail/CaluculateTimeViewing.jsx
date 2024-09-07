@@ -135,9 +135,6 @@ const endDaySetting=(what,updateOptions,timeSets,oldSearchTime,newUpdateSelected
 // 日時が前もしくは後ろの場合のselectの変更
 export function CaluculateTimeViewing(what,oldSearchTime,setSearchTime,optionSets,setOptionSets,updateSelectedIndex,setUpdateSelectedIndex){
 
-  // console.log(updateSelectedIndex)
-  // console.log(oldSearchTime)
-
 
   // まずは全てを初期化する(これをしないと2度目以降の変化に対応できない)
   const timeSets=getDefaultTimeSets();

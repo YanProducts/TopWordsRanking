@@ -34,14 +34,14 @@ export default function onSelectChange(setSearchValue,searchTime,setSearchTime,o
     case "startDay":
       setSearchTime(prevState=>({
           ...prevState,
-          "startDay":e.target.value
+          "startDay":e.target.value,
         }))
         CaluculateTimeViewing("startDay",{...searchTime,"startDay":e.target.value},setSearchTime,optionSets,setOptionSets,updateSelectedIndex,setUpdateSelectedIndex);
     break;
     case "endYear":
       setSearchTime(prevState=>({
           ...prevState,
-          "endYear":e.target.value
+          "endYear":e.target.value,
         }))
       CaluculateTimeViewing("endYear",{...searchTime,"endYear":e.target.value},setSearchTime,optionSets,setOptionSets,updateSelectedIndex,setUpdateSelectedIndex);
     break;

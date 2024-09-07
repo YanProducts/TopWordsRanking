@@ -16,7 +16,6 @@ export default function defaultDayChange(searchTime,optionSets,setOptionSets,sel
   let month30=[4,6,9,11];
   ["start","end"].forEach((which)=>{
     const dayString=which+"Days"
-    console.log(searchTime[which+"Month"]);
     if(month30.includes(Number(searchTime[which+"Month"])) && optionSets[dayString].map(element=>Number(element)).includes(31)){
 
      // 31日を省く
@@ -39,43 +38,25 @@ export default function defaultDayChange(searchTime,optionSets,setOptionSets,sel
     // うるう年も考慮
     // 当てはまる条件以外は無限ループを避けるため変更しない
 
-  let newSetOptionSets={}
-
-    if(Number(searchTime.startMonth)==2){
-      if(searchTime.startYear%4===0 && (optionSets.startDays.map(Number).includes(31) || optionSets.startDays.map(Number).includes(30) )){
+  let newSetOptionSets={};
+  ["start","end"].forEach((which)=>{
+    const dayString=which+"Days";
+    if(searchTime[which+"Month"]==2){
+      if(searchTime[which+"Year"]%4===0 && (optionSets[dayString].map(Number).includes(31) || optionSets[dayString].map(Number).includes(30) )){
         newSetOptionSets={
-        startDays:optionSets.startDays.filter(day=>{
+          [dayString]:optionSets[dayString].filter(day=>{
             return Number(day)<30;            
         })
        }
-      }else if(searchTime.startYear%4!==0 && (optionSets.startDays.map(Number).includes(31) || optionSets.startDays.map(Number).includes(30) || optionSets.startDays.map(Number).includes(29))){
+      }else if(searchTime[which+"Year"]%4!==0 && (optionSets[dayString].map(Number).includes(31) || optionSets[dayString].map(Number).includes(30) || optionSets[dayString].map(Number).includes(29))){
         newSetOptionSets={
-          startDays:optionSets.startDays.filter(day=>{
+           [dayString]:optionSets[dayString].filter(day=>{
               return Number(day)<29;            
           })
          }
       }
     }
-
-    if(Number(searchTime.endMonth)==2){
-      if(searchTime.endYear%4===0 &&(optionSets.endDays.map(Number).includes(31) || optionSets.endDays.map(Number).includes(30) )){
-        newSetOptionSets={
-          ...newSetOptionSets,
-          endDays:optionSets.endDays.filter(day=>{
-              return Number(day)<30;            
-          })
-         }
-      }else if(searchTime.endYear%4!==0 && (optionSets.endDays.map(Number).includes(31) || optionSets.endDays.map(Number).includes(30) || optionSets.endDays.map(Number).includes(29))){
-        newSetOptionSets={
-          ...newSetOptionSets,
-          endDays:optionSets.endDays.filter(day=>{
-              return Number(day)<29;            
-          })
-         }
-      }else{
-        return;
-      }
-    }
+  })
 
     if(Object.keys(newSetOptionSets).length>0){
       setOptionSets(prevState=>({

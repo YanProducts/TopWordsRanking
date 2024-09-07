@@ -19,9 +19,29 @@ export default function DetailMain(){
 
     // post時のエラーセッティング
     const [postError,setPostError]=React.useState({
-      "validationError":{},
-      "otherErrors":""
+      // "validationError":{},
+      // "otherErrors":""
     });
+
+      // エラーページ用のCSS
+  // アニメーション
+  const [disappearAnimate,setDisappearAnimate]=React.useState("");
+
+  // エラーページ。バリデーション後に投稿されたことを考え、1回ずつリセットする
+  React.useEffect(()=>{
+    if(Object.keys(postError).length===0){
+      return;
+    }
+    // まずはanimateをセット
+    setDisappearAnimate("animate-disappear")
+    // animateが3秒後に空白になるようにする
+    setTimeout(
+      ()=>{
+        setDisappearAnimate("hidden h-0 my-0")
+      }
+      ,3000
+    )
+  },[postError])
 
   // tokenやisLocalなどのdefaults
   const [defaults,setDefaults]=React.useState({});
@@ -93,13 +113,6 @@ export default function DetailMain(){
   },[optionSets])
 
   
-  // searchTimeが変更＝月によって30日31日のセットなど
-  // React.useEffect(()=>{
-
-  
-  // },[searchTime,optionSets])
-
-
   // selectが変化した時
   const selectChangeTrigger=React.useCallback((e,type)=>{
     onSelectChange(setSearchValue,searchTime,setSearchTime,optionSets,setOptionSets,updateSelectedIndex,setUpdateSelectedIndex,type,e);
@@ -107,7 +120,6 @@ export default function DetailMain(){
 
   // 月日の変更に応じて選択されるインデックスが変更されたとき
   React.useEffect(()=>{
-
     // 以下は初回を除く
     if(updateSelectedIndex.length===0){
       // 初回も行う
@@ -162,11 +174,10 @@ export default function DetailMain(){
       <div>　</div>
       <h2 className="base_h1">詳細分析</h2>
 
-      {/* あとで直す */}
-
-      <p className={`${postError.otherErrors ? (postError.otherErrors!=="" ?  "bg-yellow" : "hidden my-0 h-0"): "hidden my-0 h-0"} base_backColor text-center text-red-500 text-base`}>何らかのエラーが生じました</p>
+      <p className={`${postError.otherErrors ? (postError.otherErrors!=="" ?  disappearAnimate : "hidden my-0 h-0"): "hidden my-0 h-0"} base_frame base_backColor text-center text-red-500 text-base`}>{postError.otherErrors==="dateError" ? "開始日は終了日より前にしてください" : "何らかのエラーが生じました"}</p>
 
       <SelectSets 
+        disappearAnimate={disappearAnimate}
         selectRefs={selectRefs}
         selectChangeTrigger={selectChangeTrigger}
         optionSets={optionSets}

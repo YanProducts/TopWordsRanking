@@ -1,4 +1,4 @@
-from flask import Flask, send_from_directory,jsonify,render_template, request
+from flask import Flask, send_from_directory,jsonify, request,session
 # jsxからのアクセスを許可する
 from flask_cors import CORS
 # flaskのcsrf対策
@@ -13,6 +13,7 @@ from classes.modules.forms import DetailForm
 from classes.process import Process
 from classes.read import Read
 from classes.post import Post
+from classes.check import Check
 
 from classes.error_sets.custom_error import InvalidColumnError,SqlError
 from classes.error_sets.error_process import ErrorProcess
@@ -22,6 +23,9 @@ CORS(app)
 
 #  設定のインポート
 app.config.from_object(Config)
+
+# sessionのためのsecretkeyの作成
+app.secret_key=app.config["SESSION_SECRET_KEY"]
 
 # csrfトークンの作成
 csrf=CSRFProtect(app)
@@ -41,6 +45,56 @@ def whenCSRFError(e):
 @app.route("/",defaults={"path":"index"})
 def catch_all(path):
   return send_from_directory(app.static_folder,"index.html")
+
+# ログインのルート(表示)
+@app.route("/auth/login")
+def login():
+  print("a")
+
+# ログインのルート(初期変数=CSRF)受け渡し
+@app.route("api/login_first_data",method=["POST"])
+@csrf.exempt
+def login():
+  # データ取得
+  default_data=request.get_json()
+  # 不正なアクセス対策
+  default_pass=default_data.get("defaultPass")
+  fromURL=default_data.get("fromURL")  # ユーザーネームのリスト
+  # 不正なアクセスエラーをjsonで返す！
+  if not fromURL or not fromURL=="fromLogin" or not default_pass == app.config["DEFAULT_PASS"]:
+    return jsonify({"error":"不正なアクセスです"}),400
+  
+  # トークンを渡す
+  if '_csrf_token' not in session:
+    session['_csrf_token'] = generate_csrf()
+
+  # 返す
+  return jsonify({
+    "token":session["_csrf_token"],
+    "existedUser":["a","b","c"]
+    })
+
+# ログインのルート(送信)
+@app.route("/api/auth/login",methods=["POST"])
+def login():
+  print("b")
+
+
+# 新規作成のルート(表示)
+@app.route("/auth/register")
+def register():
+  print("a")
+
+# 新規作成のルート(送信)
+@app.route("/api/auth/register", method=["POST"])
+def register():
+  print("a")
+
+
+# パスワードチェンジのルート(表示)
+@app.route("/auth/passchange")
+# パスワードチェンジのルート(送信)
+@app.route("/api/auth/passchange", method=["POST"])
 
 
 # 初期段階での変数設定。jsx側からfetchで行われる
@@ -63,7 +117,8 @@ def get_data_forAPI():
   # インスタンスの宣言&sql接続
   sql=Sql()
   # トークンを渡す
-  token=generate_csrf()
+  if '_csrf_token' not in session:
+    session['_csrf_token'] = generate_csrf()
      # これまでのデータ取得
   existedAuthors = {i: value[0] for i, value in enumerate(MySelectForm.author_choices)}
   existedSources = {i: value[0] for i, value in enumerate(MySelectForm.source_choices)}
@@ -72,7 +127,7 @@ def get_data_forAPI():
   sql.close_process()
 
   return jsonify({
-    "token":token,
+    "token":session['_csrf_token'],
     "isIndex":True,
     "authors":existedAuthors,
     "sources":existedSources,
@@ -141,9 +196,10 @@ def detail_view():
     return jsonify({"error":"不正なアクセスです"}),400
   
   # tokenの設定
-  token=generate_csrf()
+  if '_csrf_token' not in session:
+    session['_csrf_token'] = generate_csrf()
 
-  defaultData={**process.get_detail_defaults(),"token":token,"env_type":app.config["ENV_TYPE"]}
+  defaultData={**process.get_detail_defaults(),"token":session['_csrf_token'],"env_type":app.config["ENV_TYPE"]}
 
   return jsonify(defaultData)
 
@@ -157,13 +213,14 @@ def detail_each():
 
  #バリデーション
  form=DetailForm(data=postData)
-
  if not form.validate():
-   print(form.errors) 
    return jsonify({"allErrors":form.errors}),400
 
- #月日の以前以後がおかしい
- #まずは月別の日付の設定を投稿時にすること！
+ #月日の以前以後がおかしいとき
+ #月日のclass取得
+ check=Check(postData)
+ if not check.date_check():
+   return jsonify({"allErrors":"dateError"}),422
 
  #条件解析
 

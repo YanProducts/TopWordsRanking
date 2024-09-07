@@ -2,26 +2,7 @@ import { SetOptionComponents } from "./SetOptionComponents"
 import  validationError from "./ValidationError"
 import React from "react";
 
-export const SelectSets=({selectRefs,selectChangeTrigger,optionSets,postError})=>{
-
-
-  // エラーページ用のCSS(エラーページが関数式のため、ここで宣言)
-  // アニメーション
-  const [disappearAnimate,setDisappearAnimate]=React.useState("");
-  // エラーページ。バリデーション後に投稿されたことを考え、1回ずつリセットする
-  React.useEffect(()=>{
-    // まずはanimateをセット
-    setDisappearAnimate("animate-disappear")
-    // animateが3秒後に空白になるようにする
-    setTimeout(
-      ()=>{
-        setDisappearAnimate("hidden h-0 my-0")
-      }
-      ,3000
-    )
-  },[postError])
-
-
+export const SelectSets=({disappearAnimate,selectRefs,selectChangeTrigger,optionSets,postError})=>{
 
   return(
     <>

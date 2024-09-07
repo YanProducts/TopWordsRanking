@@ -36,8 +36,16 @@ export default async function DetailMainPostFetch(searchValue,searchTime,default
           if(response.status==400){
             return response.json().then((json)=>{
               if(json?.allErrors){
-                console.log("errorok")
                 setPostError({validationError:json.allErrors})
+              }
+              throw new Error(json.allErrors);
+            })
+          }else if(response.status==422){
+            return response.json().then((json)=>{
+              if(json?.allErrors==="dateError"){
+                setPostError({otherErrors:"dateError"})
+              }else{
+                setPostError({otherErrors:"error!"})              
               }
               throw new Error(json.allErrors);
             })
