@@ -34,26 +34,24 @@ class MySelectForm(FlaskForm):
 
 # 詳細分析
 class DetailForm(FlaskForm):
-
-
   sql=Sql()
   read=Read(sql)
 
   author_choices=[r["author"] for r in read.get_rank("author")]
   source_choices=[r["source"] for r in read.get_rank("source")]
 
-  detail_author=SelectField(id="detail",validators=[AnyOf(author_choices)])
-  detail_source=SelectField(id="detail",validators=[AnyOf(source_choices)])
+  detail_author=SelectField(id="detail",validators=[AnyOf(author_choices)],choices=author_choices)
+  detail_source=SelectField(id="detail",validators=[AnyOf(source_choices)],choices=source_choices)
   
-  detail_start_year=SelectField(id="detailStartYearRequest", validators=[AnyOf([str(n) for n in range(2024, datetime.datetime.now().year+1)])])
+  detail_start_year=SelectField(id="detailStartYearRequest", validators=[AnyOf([str(n) for n in range(2020, datetime.datetime.now().year+1)])],choices=[str(n) for n in range(2020, datetime.datetime.now().year+1)])
 
-  detail_start_month=SelectField(id="detailStartMonthRequest",validators=[AnyOf([str(n) for n in range(1, 13)])])
+  detail_start_month=SelectField(id="detailStartMonthRequest",validators=[AnyOf([str(n) for n in range(1, 13)])],choices=[str(n) for n in range(1, 13)])
 
-  detail_start_day=SelectField(id="detailStartDayRequest",validators=[AnyOf([str(n) for n in range(1, 32)])])
+  detail_start_day=SelectField(id="detailStartDayRequest",validators=[AnyOf([str(n) for n in range(1, 32)])],choices=[str(n) for n in range(1, 32)])
 
 
-  detail_end_year=SelectField(id="detailEndYearRequest", validators=[AnyOf([str(n) for n in range(2020, datetime.datetime.now().year+1)])])
+  detail_end_year=SelectField(id="detailEndYearRequest", validators=[AnyOf([str(n) for n in range(2020, datetime.datetime.now().year+1)])],choices=[str(n) for n in range(2020, datetime.datetime.now().year+1)])
 
-  detail_end_month=SelectField(id="detailEndMonthRequest", validators=[AnyOf([str(n) for n in range(1, 13)])])
+  detail_end_month=SelectField(id="detailEndMonthRequest", validators=[AnyOf([str(n) for n in range(1, 13)])],choices=[str(n) for n in range(1, 13)])
   
-  detail_end_day=SelectField(id="detailEndDayRequest", validators=[AnyOf([str(n) for n in range(1, 32)])])
+  detail_end_day=SelectField(id="detailEndDayRequest", validators=[AnyOf([str(n) for n in range(1, 32)])],choices=[str(n) for n in range(1, 32)])

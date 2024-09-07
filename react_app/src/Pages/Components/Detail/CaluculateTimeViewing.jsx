@@ -135,6 +135,10 @@ const endDaySetting=(what,updateOptions,timeSets,oldSearchTime,newUpdateSelected
 // 日時が前もしくは後ろの場合のselectの変更
 export function CaluculateTimeViewing(what,oldSearchTime,setSearchTime,optionSets,setOptionSets,updateSelectedIndex,setUpdateSelectedIndex){
 
+  // console.log(updateSelectedIndex)
+  // console.log(oldSearchTime)
+
+
   // まずは全てを初期化する(これをしないと2度目以降の変化に対応できない)
   const timeSets=getDefaultTimeSets();
 
@@ -158,7 +162,6 @@ export function CaluculateTimeViewing(what,oldSearchTime,setSearchTime,optionSet
       
     // ③もしendとstartの年が同じになった場合＝endのstartの月より前を消し、startより前のendを消す  
     if(oldSearchTime.startYear==oldSearchTime.endYear){
-      
       // Monthの処理。
       // option変更が開始月ではない時
       if(what!=="startMonth"){
@@ -172,7 +175,6 @@ export function CaluculateTimeViewing(what,oldSearchTime,setSearchTime,optionSet
 
       // ③②でさらにendとstartの月が同じになった場合＝endのstartの月より前を消し、startより前のendを消す
       if(oldSearchTime.startMonth==oldSearchTime.endMonth){
-        
           // 動かしたのが開始日ではない場合は開始日を終了日に合わせる
           if(what!=="startDay"){
             [updateOptions,newUpdateSelectedIndex]=startDaySetting(updateOptions,timeSets,oldSearchTime,newUpdateSelectedIndex)
@@ -190,17 +192,18 @@ export function CaluculateTimeViewing(what,oldSearchTime,setSearchTime,optionSet
           newUpdateSelectedIndex.endDays=oldSearchTime.endDay-1;
         }
 
-      // 違う年だった時(違う年に戻ったとき)
-      }else{
-        updateOptions.startMonths=timeSets.months;
-        updateOptions.endMonths=timeSets.months; 
-        updateOptions.startDays=timeSets.days;
-        updateOptions.endDays=timeSets.days; 
+    // 違う年だった時(違う年に戻ったとき)
+    }else{
+      updateOptions.startMonths=timeSets.months;
+      updateOptions.endMonths=timeSets.months; 
+      updateOptions.startDays=timeSets.days;
+      updateOptions.endDays=timeSets.days; 
         
-        // endは前回と同じインデックスならズレる可能性があるので修正
+        // endは前回と同じインデックスならズレるので修正
         newUpdateSelectedIndex.endMonths=oldSearchTime.endMonth-1;
         newUpdateSelectedIndex.endDays=oldSearchTime.endDay-1;
-      }
+    }
+
       
     // optionはauthorsとsourcesはデフォルト、時間はこのページで設定したデフォルトのtimeSets表示に加え、updateすべきは塗り替える(選択インデックス(selectRef)や選択のvalueは塗り替えることが可能)
      setOptionSets(prevState=>({

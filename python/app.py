@@ -13,6 +13,7 @@ from classes.modules.forms import DetailForm
 from classes.process import Process
 from classes.read import Read
 from classes.post import Post
+
 from classes.error_sets.custom_error import InvalidColumnError,SqlError
 from classes.error_sets.error_process import ErrorProcess
 
@@ -85,7 +86,6 @@ def get_data_forAPI():
 @app.route("/api/post_data",methods=["POST"])
 def when_post():
 
-  print("aaa")
 
   # tokenの検証とバリデーションは必要
 
@@ -143,9 +143,33 @@ def detail_view():
   # tokenの設定
   token=generate_csrf()
 
-  defaultData={**process.get_detail_defaults(),"token":token}
+  defaultData={**process.get_detail_defaults(),"token":token,"env_type":app.config["ENV_TYPE"]}
 
   return jsonify(defaultData)
+
+
+# 詳細事項の投稿
+@app.route("/api/detail_each",methods=["POST"])
+
+def detail_each():
+#  データの受け取りと変更
+ postData=request.get_json()
+
+ #バリデーション
+ form=DetailForm(data=postData)
+
+ if not form.validate():
+   print(form.errors) 
+   return jsonify({"allErrors":form.errors}),400
+
+ #月日の以前以後がおかしい
+ #まずは月別の日付の設定を投稿時にすること！
+
+ #条件解析
+
+ #合うものをreturn
+ return jsonify({"a":"aaaa"})
+
 
 
 if __name__=="__main__":

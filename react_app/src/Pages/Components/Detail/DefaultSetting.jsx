@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate  } from 'react-router-dom';
 
-export default function DefaultSetting(errorState,setErrorState,token,setToken,optionSets,setOptionSets,navigate){
+export default function DefaultSetting(errorState,setErrorState,defaults,setDefaults,optionSets,setOptionSets,navigate){
 
   // 初期値となるoptionの入力
   const headers={
@@ -22,9 +22,11 @@ export default function DefaultSetting(errorState,setErrorState,token,setToken,o
     }
     return response.json()
   }).then((json)=>{
+
     // token格納
-    setToken({
-      "token":json.token
+    setDefaults({
+      "token":json.token,
+      "isLocal":json.env_type
     })
     // option格納
     setOptionSets({

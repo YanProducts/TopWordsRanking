@@ -3,8 +3,9 @@ import React from 'react';
 import { Link,useNavigate  } from 'react-router-dom';
 import DefaultSetting from '../Components/Detail/DefaultSetting';
 import onSelectChange from '../Components/Detail/OnSelectChange';
-import { SetOptionComponents } from '../Components/Detail/SetOptionComponents';
-
+import DetailMainPostFetch from '../Components/Fetch/DetailMainPostFetch';
+import { SelectSets } from '../Components/Detail/SelectSets';
+import defaultDayChange from '../Components/Detail/DefaultDayChange';
 
 export default function DetailMain(){
    // ページ遷移用
@@ -13,11 +14,17 @@ export default function DetailMain(){
     // 初期ページのためのエラーセット
     const [errorState,setErrorState]=React.useState({
       "outURL":"",
-      "type":""
+      "type":"",
     });
 
-  // token
-  const [token,setToken]=React.useState("");
+    // post時のエラーセッティング
+    const [postError,setPostError]=React.useState({
+      "validationError":{},
+      "otherErrors":""
+    });
+
+  // tokenやisLocalなどのdefaults
+  const [defaults,setDefaults]=React.useState({});
     
   // 筆者・媒体の選択決定
   const [searchValue,setSearchValue]=React.useState({"author":"","source":""});
@@ -48,13 +55,14 @@ export default function DetailMain(){
     endDay: React.useRef(null),
   };
 
-  // 最初のレンダリング終了時か否か
+  // 最初のレンダリングか否か（optionのセット）
   const [isFirstFinish,setIsFirstFinish]=React.useState(true);
+
 
   React.useEffect(()=>{
     // 初期の設定。isFirstFinishとoptionSetsの両方がセットされる。必ず非同期の順番はoptionSetsが先とする
    const initial_setting=async()=>{
-      DefaultSetting(errorState,setErrorState, token,setToken,optionSets,setOptionSets,navigate)
+      DefaultSetting(errorState,setErrorState, defaults,setDefaults,optionSets,setOptionSets,navigate)
     }
     initial_setting();
   },[])
@@ -78,11 +86,19 @@ export default function DetailMain(){
           "startDay":1,
           "endYear":optionSets.endYears[optionSets.endYears.length-1],
           "endMonth":date.getMonth()+1,
-          "endDay":date.getDate()-1
+          "endDay":date.getDate()
         }))
         setIsFirstFinish(false);
     }
   },[optionSets])
+
+  
+  // searchTimeが変更＝月によって30日31日のセットなど
+  // React.useEffect(()=>{
+
+  
+  // },[searchTime,optionSets])
+
 
   // selectが変化した時
   const selectChangeTrigger=React.useCallback((e,type)=>{
@@ -91,8 +107,11 @@ export default function DetailMain(){
 
   // 月日の変更に応じて選択されるインデックスが変更されたとき
   React.useEffect(()=>{
-    // 初回を除く
+
+    // 以下は初回を除く
     if(updateSelectedIndex.length===0){
+      // 初回も行う
+      defaultDayChange(searchTime,optionSets,setOptionSets,selectRefs)
       return;
     }
 
@@ -102,7 +121,6 @@ export default function DetailMain(){
     // 新たな格納場所のキーが存在するもののみ、新しい選択場所に格納
     const newTimeStoreFunction=async()=>{
       await Promise.all(Object.keys(updateSelectedIndex).map((optionName)=>{
-
 
         // 変更前の場合のエラー防止
         if(optionSets[optionName].length-1<updateSelectedIndex[optionName]){
@@ -119,12 +137,15 @@ export default function DetailMain(){
       }))
 
       //CalculateTimeViewingで設定された値を反映 
-      setSearchTime(prevState=>({
+      await setSearchTime(prevState=>({
         ...prevState,
         newSearchTime
       }));
 
+      defaultDayChange(searchTime,optionSets,setOptionSets,selectRefs)
+
     }
+    
     newTimeStoreFunction();
 
   // optionSetsとupdateSelectedIndexのどちらが先に来るかにより処理が変わるため、両方が変更された時に合わせる
@@ -140,65 +161,23 @@ export default function DetailMain(){
 
       <div>　</div>
       <h2 className="base_h1">詳細分析</h2>
-  
-      <form action="/detail_each" method="post">
-        {/* csrf設定！！！ */}
 
-        <div className="base_frame my-6 text-center">
-          <p className="base_p mb-4">①分析する筆者を選んでください</p>
-          <select className="mx-auto w-2/5 min-w-[100px] text-center" ref={selectRefs.author} onChange={(e)=>{selectChangeTrigger(e,"author")}}>
-           <SetOptionComponents optionType={optionSets.authors} type={"authors"}/>
-          </select>
-        </div>
+      {/* あとで直す */}
 
-        <div className="base_frame  my-6 text-center">
-          <p className="base_p  mb-4">②分析する媒体を選んでください</p>
-          <select className="w-2/5 min-w-[100px] text-center" ref={selectRefs.source} onChange={(e)=>{selectChangeTrigger(e,"source")}}>
-          <SetOptionComponents optionType={optionSets.sources} type={"sources"}/>
-          </select>
-        </div>
-        
-        <div className="base_frame my-6">
-          <p className="base_p">③分析するのはいつから？</p>
-          <div className='mt-5 flex base_frame justify-center'>
-            <select className="w-20" onChange={(e)=>{selectChangeTrigger(e,"startYear")}} ref={selectRefs.startYear}>
-            <SetOptionComponents optionType={optionSets.startYears} type={"startYear"}/>
-            </select>
-            <span>年</span>
-            <select className="w-12" onChange={(e)=>{selectChangeTrigger(e,"startMonth")}} ref={selectRefs.startMonth}>
-            <SetOptionComponents optionType={optionSets.startMonths}  type={"startmonth"}/>
-            </select>
-            <span>月</span>
-            <select className="w-12" onChange={(e)=>{selectChangeTrigger(e,"startDay")}} ref={selectRefs.startDay}>
-            <SetOptionComponents optionType={optionSets.startDays} type={"startDay"}/>
-            </select>
-            <span>日</span>
-         </div>
-         </div>
- 
-         <div className="base_frame my-6">
-          <p className="base_p">④分析するのはいつまで？</p>
-          <div className='flex base_frame justify-center mt-5'>
-          <select className="w-20" onChange={(e)=>{selectChangeTrigger(e,"endYear")}}  ref={selectRefs.endYear}>
-          <SetOptionComponents optionType={optionSets.endYears} type={"endYear"}/>
-          </select>
-          <span>年</span>
-          <select className="w-12" onChange={(e)=>{selectChangeTrigger(e,"endMonth")}}  ref={selectRefs.endMonth}>
-          <SetOptionComponents optionType={optionSets.endMonths} type={"endMonth"}/>
-          </select>
-          <span>月</span>
-          <select className="w-12" onChange={(e)=>{selectChangeTrigger(e,"endDay")}}  ref={selectRefs.endDay}>
-          <SetOptionComponents optionType={optionSets.endDays}  type={"endDay"}/>
-          </select>
-          <span>日</span>
-          </div>
+      <p className={`${postError.otherErrors ? (postError.otherErrors!=="" ?  "bg-yellow" : "hidden my-0 h-0"): "hidden my-0 h-0"} base_backColor text-center text-red-500 text-base`}>何らかのエラーが生じました</p>
 
-        </div>
+      <SelectSets 
+        selectRefs={selectRefs}
+        selectChangeTrigger={selectChangeTrigger}
+        optionSets={optionSets}
+        postError={postError}
+      />
 
+      <div>
         <div className="base_btn_div mt-6">
-          <button className="base_btn">決定！</button>
+          <button className="base_btn" onClick={()=>{DetailMainPostFetch(searchValue,searchTime,defaults,setPostError)}}>決定！</button>
         </div>
-      </form>
+      </div>
 
 
       <p className='base_link_p mt-6'><Link className='base_link'to="/">戻る</Link></p>

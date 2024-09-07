@@ -60,7 +60,6 @@ export default function Index(){
     setText(e.target.value)
   }
 
-
   // 投稿ボタンが押されたとき
   const onBtnClick=(e)=>{
     e.preventDefault();

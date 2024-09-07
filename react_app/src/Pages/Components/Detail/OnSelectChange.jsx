@@ -8,19 +8,19 @@ export default function onSelectChange(setSearchValue,searchTime,setSearchTime,o
     case "author":
       setSearchValue(prevState=>({
           ...prevState,
-          "authorSets":e.target.value
-      }))
+          "author":e.target.value,
+        }))
     break;
     case "source":
       setSearchValue(prevState=>({
           ...prevState,
-          "sourceSets":e.target.value
+          "source":e.target.value,
       }))
     break;
     case "startYear":
       setSearchTime(prevState=>({
           ...prevState,
-          "startYear":e.target.value
+          "startYear":e.target.value,
         }))
       CaluculateTimeViewing("startYear",{...searchTime,"startYear":e.target.value},setSearchTime,optionSets,setOptionSets,updateSelectedIndex,setUpdateSelectedIndex);
     break;
