@@ -23,7 +23,7 @@ export function RegisterPatternCheck(userName,passWord,passWord2,setError,setFet
   if(!passWord.match(passPtn)){
     returnedError={
       ...returnedError,
-      "passPtn":"パスワードは半角の数字・大文字・小文字・全てを使用してください"
+      "passPtn":"パスワードは半角数字/大文字/小文字全て必須です"
     }
   }
  

@@ -2,6 +2,7 @@ import React from "react"
 import { Helmet, HelmetProvider } from 'react-helmet-async'
 import { Link,useNavigate  } from 'react-router-dom';
 import DefaultSetting from "../Components/Auth/DefaultSettingOnLogin";
+import { ValidationError } from "../Components/Auth/ValidationError";
 
 // ログインページ（記入側）
 export default function Login(){
@@ -46,6 +47,11 @@ export default function Login(){
   React.useEffect(()=>{
     if(Object.keys(error).length>0){
       setErrorCss("animate-disappear");
+      const errorTimeOutSets=setTimeout(()=>{
+        setError({})
+        setErrorCss("hidden")
+      },3000)
+      return (()=>{clearTimeout(errorTimeOutSets)});
     }
   },[error])
 
@@ -90,11 +96,11 @@ export default function Login(){
 
         return;
       }else{
-        setError({"notMatchedError":"ユーザー名またはパスワードが違います"})
+        setError({"notMatched":"ユーザー名またはパスワードが違います"})
       }
       
     }).catch(error=>{
-      console.log(error.notMatchedError)
+      console.log(error.notMatched)
     })
   }
 
@@ -119,10 +125,14 @@ export default function Login(){
           <p>パスワード</p>
           <input className="w-[100%] border-2 border-black rounded-sm" type="password" value={passWord} onChange={onPassWordChange} ref={passWordRef}/>
         </div>
-        <p className={`${errorCss} base_frame bace_backColor text-red-500 text-center`}>{error?.notMatchedError !== "" ? error?.notMatchedError : ""}</p>
+        {/* 違った際のUI表示 */}
+        {ValidationError(error,errorCss,"login","matched")}
         <div className="base_btn_div">
           <button className="base_btn" onClick={onLoginBtnClick}>送信！</button>
         </div>
+        
+        <p className='base_link_p'>新規登録は<Link className='base_link' to="/Auth/Register">こちら</Link></p>
+
       </div>
 
       {/* 空白用 */}

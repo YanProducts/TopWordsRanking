@@ -57,6 +57,11 @@ export default function Register(){
   React.useEffect(()=>{
     if(Object.keys(error).length>0){
       setErrorCss("animate-disappear");
+      const errorTimeOutSets=setTimeout(()=>{
+        setError({})
+        setErrorCss("hidden")
+      },3000)
+      return (()=>{clearTimeout(errorTimeOutSets)});
     }
   },[error])
 
@@ -67,6 +72,12 @@ export default function Register(){
   // デフォルト値のセット
   // ここでjsonに値がセットされ、tokenや登録済みユーザーが定義される。
   DefaultSetting(setToken,setExistedUser,navigate)
+
+  // ログインボタンクリック
+  const onRegisterBtnClick=()=>{
+    // この内部でsetFetchOKを操作し、OKだったらfetchOKが変化してuseEffectに向かう
+    RegisterPatternCheck(userName,passWord,passWord2,setError,setFetchOK);
+  }
 
 
   // 条件が満たされてfetchが可能になった時（isFetchOkの値で確認）
@@ -119,12 +130,6 @@ export default function Register(){
   },[fetchOK])
 
 
-  // ログインボタンクリック
-  const onRegisterBtnClick=()=>{
-    // この内部でsetFetchOKを操作し、OKだったらfetchOKが変化してuseEffectに向かう
-    RegisterPatternCheck(userName,passWord,passWord2,setError,setFetchOK)
-  }
-
 
   return(
     <HelmetProvider>
@@ -140,32 +145,31 @@ export default function Register(){
         <h2  className="base_h w-[90%] min-w-[300px] text-lg mb-5">ユーザー名とパスワードを決めてください</h2>
 
         <div className="base_frame text-left my-3 px-2">
-          <p>ユーザー名</p>
-          <span className="text-center">半角3文字以上</span>
+          <p>ユーザー名<span className="text-sm text-red-400">(半角3文字以上)</span></p>
           <input className="w-[100%] border-2 border-black rounded-sm" type="text" value={userName} onChange={onUserNameChange} ref={userNameRef}/>
         </div>
-        {ValidationError(error,"register","userName")}
+        {ValidationError(error,errorCss,"register","userName")}
 
 
         <div className="base_frame text-left my-5 px-2">
-          <p>パスワード</p>
-          <span className="text-center">大文字・小文字・数字全てを含む8文字以上</span>
+          <p>パスワード<span className="text-sm text-red-400">(大文字小文字数字全て含む8字以上)</span></p>
           <input className="w-[100%] border-2 border-black rounded-sm" type="password" value={passWord} onChange={onPassWordChange} ref={passWordRef}/>
         </div>
-        {ValidationError(error,"register","passWord")}
+        {ValidationError(error,errorCss,"register","passWord")}
 
 
         <div className="base_frame text-left my-5 px-2">
-          <p>パスワード(確認用)</p>
+          <p>パスワード<span className="text-sm text-red-400">(確認用)</span></p>
           <input className="w-[100%] border-2 border-black rounded-sm" type="password" value={passWord2} onChange={onPassWord2Change} ref={passWordRef2}/>
         </div>
-        {ValidationError(error,"register","passWord2")}
-
-
+        {ValidationError(error,errorCss,"register","passWord2")}
 
         <div className="base_btn_div">
           <button className="base_btn" onClick={onRegisterBtnClick}>決定！</button>
         </div>
+
+        <p className='base_link_p'>ログインは<Link className='base_link' to="/Auth/Login">こちら</Link></p>
+
       </div>
 
       {/* 空白用 */}
