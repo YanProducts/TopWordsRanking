@@ -4,6 +4,8 @@ export const SetOptionComponents=
 // memoを使うことで、selectボックス操作時の変化を防げる
   React.memo(({optionType,type})=>{
 
+    // console.log(optionType)
+
     return(
       <>
         {(type==="authors" || type==="sources") && (

@@ -16,7 +16,7 @@ class Read:
 
     try:
       sql.open_process()
-      sql._cur.execute(f"select {what}, count(*) as c from py_access group by {what} order by c desc")    
+      sql._cur.execute("select %s, count(*) as c from py_access group by %s order by c desc",(what,what))    
       rank=[{what:r[0], "c":r[1]} for r in sql._cur.fetchall()]
       if rank:
         rank=self.rank_change(rank)

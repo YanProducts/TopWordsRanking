@@ -27,6 +27,9 @@ export const SelectSets=({disappearAnimate,selectRefs,selectChangeTrigger,option
       <div className='mt-6 flex base_frame justify-center'>
         <select className="w-20" onChange={(e)=>{selectChangeTrigger(e,"startYear")}} ref={selectRefs.startYear}>
         <SetOptionComponents optionType={optionSets.startYears} type={"startYear"}/>
+        
+        
+        
         </select>
         <span>年</span>
         <select className="w-12" onChange={(e)=>{selectChangeTrigger(e,"startMonth")}} ref={selectRefs.startMonth}>

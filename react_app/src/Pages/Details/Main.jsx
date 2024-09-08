@@ -78,18 +78,12 @@ export default function DetailMain(){
   // 最初のレンダリングか否か（optionのセット）
   const [isFirstFinish,setIsFirstFinish]=React.useState(true);
 
-
-  React.useEffect(()=>{
-    // 初期の設定。isFirstFinishとoptionSetsの両方がセットされる。必ず非同期の順番はoptionSetsが先とする
-   const initial_setting=async()=>{
-      DefaultSetting(errorState,setErrorState, defaults,setDefaults,optionSets,setOptionSets,navigate)
-    }
-    initial_setting();
-  },[])
+  // 初期登録(内部でeffectを呼び出し。optionとtokenをセット)
+  DefaultSetting(errorState,setErrorState, defaults,setDefaults,optionSets,setOptionSets,navigate)
 
   React.useEffect(()=>{
     // 初回かつoptionSetsがセットされた後のみ
-    if(isFirstFinish && optionSets.startMonths.length>0){
+    if(isFirstFinish && optionSets.startYears.length>0){
       const date=new Date();
       (selectRefs.author).current.selectedIndex=0;
       (selectRefs.source).current.selectedIndex=0;

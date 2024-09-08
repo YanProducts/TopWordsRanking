@@ -14,9 +14,11 @@ from classes.process import Process
 from classes.read import Read
 from classes.post import Post
 from classes.check import Check
-
+from classes.auth.read import AuthRead
+from classes.auth.post import AuthPost
 from classes.error_sets.custom_error import InvalidColumnError,SqlError
 from classes.error_sets.error_process import ErrorProcess
+import bcrypt
 
 app=Flask(__name__,static_folder="../react_app/build")
 CORS(app)
@@ -24,7 +26,7 @@ CORS(app)
 #  設定のインポート
 app.config.from_object(Config)
 
-# sessionのためのsecretkeyの作成
+# # sessionのためのsecretkeyの作成
 app.secret_key=app.config["SESSION_SECRET_KEY"]
 
 # csrfトークンの作成
@@ -48,53 +50,91 @@ def catch_all(path):
 
 # ログインのルート(表示)
 @app.route("/auth/login")
-def login():
+def loginView():
   print("a")
+  return jsonify({"a":"a"})
 
 # ログインのルート(初期変数=CSRF)受け渡し
-@app.route("api/login_first_data",method=["POST"])
+@app.route("/api/auth/login_first_data",methods=["POST"])
 @csrf.exempt
-def login():
+def loginFirstSetting():
   # データ取得
   default_data=request.get_json()
   # 不正なアクセス対策
   default_pass=default_data.get("defaultPass")
   fromURL=default_data.get("fromURL")  # ユーザーネームのリスト
   # 不正なアクセスエラーをjsonで返す！
-  if not fromURL or not fromURL=="fromLogin" or not default_pass == app.config["DEFAULT_PASS"]:
+  if not fromURL or not fromURL=="auth/login" or not default_pass == app.config["DEFAULT_PASS"]:
     return jsonify({"error":"不正なアクセスです"}),400
   
   # トークンを渡す
-  if '_csrf_token' not in session:
-    session['_csrf_token'] = generate_csrf()
+  token = generate_csrf()
+  print(token)
 
   # 返す
   return jsonify({
-    "token":session["_csrf_token"],
+    "token":token,
     "existedUser":["a","b","c"]
     })
 
 # ログインのルート(送信)
 @app.route("/api/auth/login",methods=["POST"])
-def login():
-  print("b")
+def loginPost():
+  postData=request.get_json()
+  sql=Sql()
+  post=AuthPost(sql)
+  # 存在と一致の確認
+  isOk=post.check_login(postData.userName,postData.passWord)
+  # 正否の返却
+  return jsonify({"isOk":isOk})
 
 
 # 新規作成のルート(表示)
 @app.route("/auth/register")
-def register():
+def registerView():
   print("a")
+  return jsonify({"a":"a"})
+
+
+# 新規作成のルート(初期設定)
+@app.route("/api/auth/register_first_data", methods=["POST"])
+@csrf.exempt
+def registerFirstSetting():
+  # トークンを渡す
+  token = generate_csrf()
+
+  # 返す
+  return jsonify({
+    "token":token,
+    "existedUser":["a","b","c"]
+    })
+
 
 # 新規作成のルート(送信)
-@app.route("/api/auth/register", method=["POST"])
-def register():
-  print("a")
+@app.route("/api/auth/register", methods=["POST"])
+def registerPost():
+  postData=request.get_json()
+  sql=Sql()
+  read=AuthRead(sql)
+  post=AuthPost(sql,read)
+  # 成功/失敗何もメッセージを返す
+  message=post.store(postData["userName"],postData["passWord"])
+  print(message)
+  return jsonify({"message":message})
+
 
 
 # パスワードチェンジのルート(表示)
 @app.route("/auth/passchange")
+def passChangeView():
+  print("a")
+  return jsonify({"a":"a"})
+
 # パスワードチェンジのルート(送信)
-@app.route("/api/auth/passchange", method=["POST"])
+@app.route("/api/auth/passchange", methods=["POST"])
+def passChangePost():
+  print("a")
+  return jsonify({"a":"a"})
 
 
 # 初期段階での変数設定。jsx側からfetchで行われる
@@ -111,14 +151,13 @@ def get_data_forAPI():
   fromURL=default_data.get("fromURL")
 
   # 不正なアクセスエラーをjsonで返す！
-  if not fromURL or not fromURL=="fromIndex" or not default_pass == app.config["DEFAULT_PASS"]:
+  if not fromURL or not fromURL=="index" or not default_pass == app.config["DEFAULT_PASS"]:
     return jsonify({"error":"不正なアクセスです"}),400
 
   # インスタンスの宣言&sql接続
   sql=Sql()
   # トークンを渡す
-  if '_csrf_token' not in session:
-    session['_csrf_token'] = generate_csrf()
+  token = generate_csrf()
      # これまでのデータ取得
   existedAuthors = {i: value[0] for i, value in enumerate(MySelectForm.author_choices)}
   existedSources = {i: value[0] for i, value in enumerate(MySelectForm.source_choices)}
@@ -127,7 +166,7 @@ def get_data_forAPI():
   sql.close_process()
 
   return jsonify({
-    "token":session['_csrf_token'],
+    "token":token,
     "isIndex":True,
     "authors":existedAuthors,
     "sources":existedSources,
@@ -192,14 +231,13 @@ def detail_view():
   fromURL=default_data.get("fromURL")
 
   # 不正なアクセスエラーをjsonで返す！
-  if not fromURL or not fromURL== "main" or not default_pass == app.config["DEFAULT_PASS"]:
+  if not fromURL or not fromURL== "detail/main" or not default_pass == app.config["DEFAULT_PASS"]:
     return jsonify({"error":"不正なアクセスです"}),400
   
   # tokenの設定
-  if '_csrf_token' not in session:
-    session['_csrf_token'] = generate_csrf()
+  token = generate_csrf()
 
-  defaultData={**process.get_detail_defaults(),"token":session['_csrf_token'],"env_type":app.config["ENV_TYPE"]}
+  defaultData={**process.get_detail_defaults(),"token":token,"env_type":app.config["ENV_TYPE"]}
 
   return jsonify(defaultData)
 

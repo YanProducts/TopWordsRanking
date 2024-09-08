@@ -1,6 +1,6 @@
 export default function NotFoundPage(){
   return(
-<div>aaa</div>
+<div>ページが見当たりません</div>
   )
 
 }

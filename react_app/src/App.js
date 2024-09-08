@@ -5,6 +5,9 @@ import Index from './Pages/Index';
 import Analyze from './Pages/Analyze';
 import DetailMain from './Pages/Details/Main';
 import DetailResult from './Pages/Details/Result';
+import Login from "./Pages/Auth/Login";
+import Register from "./Pages/Auth/Register";
+import PassChange from "./Pages/Auth/PassChange";
 
 import ShowErrorPage from "./Pages/Error";
 import NotFoundPage from './Pages/NotFoundPage';
