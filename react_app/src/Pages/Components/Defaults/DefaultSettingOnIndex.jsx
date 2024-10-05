@@ -1,7 +1,8 @@
 import React from "react";
-import { DefaultSettingProcess } from "../Commons/DefaultSettingProcess";
+import { DefaultSettingProcess } from "./DefaultSettingProcess";
 
-export function DefaultSetting({navigate,defaults,setDefault,setAuthorOptions,setSourceOptions}){
+export function DefaultSetting({navigate,defaults,setDefaults,setAuthorOptions,setSourceOptions}){
+
 
   // 取得するjson
   const [json,setJson]=React.useState({});
@@ -15,8 +16,9 @@ export function DefaultSetting({navigate,defaults,setDefault,setAuthorOptions,se
   React.useEffect(()=>{
     if(Object.keys(json).length>0){
       // 初期設定
-         setDefault({
+         setDefaults({
            "token":json.token,
+           "userName":json.userName,
            "authors":json.authors,
            "sources":json.sources,
            "env_type":json.env_type
@@ -26,6 +28,7 @@ export function DefaultSetting({navigate,defaults,setDefault,setAuthorOptions,se
 
   // 初期設定が登録されたら、optionの取得
   React.useEffect(()=>{
+    // 過去履歴があるときは挿入、ないときは初期値のまま
     if(Object.keys(defaults.authors).length>0){
       const newAuthorOptions=Object.entries(defaults.authors).map(([key,value])=>{
             return(<option key={key}>{value}</option>)

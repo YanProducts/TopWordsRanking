@@ -1,134 +1,30 @@
 import React from "react"
 import { Helmet, HelmetProvider } from 'react-helmet-async'
 import { Link,useNavigate  } from 'react-router-dom';
-import DefaultSetting from "../Components/Auth/DefaultSettingOnRegister";
-import { RegisterPatternCheck } from "../Components/Auth/RegisterPatternCheck";
-import { ValidationError } from "../Components/Auth/ValidationError";
+import DefaultSetting from "../Components/Defaults/Auth/DefaultSettingOnRegister";
+import { RegisterPatternCheck } from "../Components/PageParts/AuthParts/RegisterPatternCheck";
+import { ValidationError } from "../Components/PageParts/AuthParts/ValidationError";
+import RegisterDefinition from "../Components/BaseDefinition/Auth/RegisterDefinition";
+import RegisterAction from "../Components/HandleAction/Auth/RegisterAction"
+import RegisterEffects from "../Components/BaseDefinition/Effects/Auth/RegisterEffects"
 
 // ログインページ（記入側）
 export default function Register(){
 
-  // ページ遷移用
-  const navigate=useNavigate();
+  // 変数とstate
+  const {navigate,userName,setUserName,passWord,setPassWord,passWord2,setPassWord2,userNameRef,passWordRef,passWordRef2,token,setToken,envType,setEnvType,error,setError,errorCss,setErrorCss,fetchOK,setFetchOK}=RegisterDefinition()
 
-  // ユーザー名とパスワードのstateとref
-  const [userName,setUserName]=React.useState("");
-  const [passWord,setPassWord]=React.useState("");
-  const [passWord2,setPassWord2]=React.useState("");
+  // ハンドルアクション
+  const{onUserNameChange,onPassWordChange,onPassWord2Change,onRegisterBtnClick}=RegisterAction(setUserName,userNameRef,setPassWord,passWordRef,setPassWord2,passWordRef2,userName,passWord,passWord2,setError,setFetchOK,RegisterPatternCheck)
 
-  const userNameRef=React.useRef(null);
-  const passWordRef=React.useRef(null);
-  const passWordRef2=React.useRef(null);
-
-  // ユーザー名入力
-  const onUserNameChange=(e)=>{
-    setUserName(e.target.value);
-    userNameRef.current.focus()
-  }
-  
-  // パスワード入力
-  const onPassWordChange=(e)=>{
-    setPassWord(e.target.value);
-    passWordRef.current.focus()
-  }
-
-  // パスワード入力
-  const onPassWord2Change=(e)=>{
-    setPassWord2(e.target.value);
-    passWordRef2.current.focus()
-  }
-
-  // tokenと既存ユーザー
-  const [token,setToken]=React.useState("")
-  const [existedUser,setExistedUser]=React.useState([""])
+  // Effect系列
+  RegisterEffects(error,setError,setErrorCss,fetchOK,token,userName,passWord,navigate,envType)
 
 
-  
-  // エラーのhtml表示用
-  const [error,setError]=React.useState({
-    
-  });
-
-
-  // エラーのcssの値
-  const [errorCss,setErrorCss]=React.useState("");
-
-  // エラーCSSのセッティング
-  React.useEffect(()=>{
-    if(Object.keys(error).length>0){
-      setErrorCss("animate-disappear");
-      const errorTimeOutSets=setTimeout(()=>{
-        setError({})
-        setErrorCss("hidden")
-      },3000)
-      return (()=>{clearTimeout(errorTimeOutSets)});
-    }
-  },[error])
-
-  // fetchに渡しても良いかの確認
-  const [fetchOK,setFetchOK]=React.useState(false);
-
-  
   // デフォルト値のセット
-  // ここでjsonに値がセットされ、tokenや登録済みユーザーが定義される。
-  DefaultSetting(setToken,setExistedUser,navigate)
-
-  // ログインボタンクリック
-  const onRegisterBtnClick=()=>{
-    // この内部でsetFetchOKを操作し、OKだったらfetchOKが変化してuseEffectに向かう
-    RegisterPatternCheck(userName,passWord,passWord2,setError,setFetchOK);
-  }
-
-
-  // 条件が満たされてfetchが可能になった時（isFetchOkの値で確認）
-  React.useEffect(()=>{
-
-    // fetch不可なら戻る
-    if(!fetchOK){
-      return;
-    }
-
-    // 登録
-    const headers={
-      "Content-Type":"application/json",
-      "X-CSRFToken":token,
-    }
-    fetch(
-      "/api/auth/register",{
-        method:"post",
-        headers:headers,
-        body:JSON.stringify({
-          "userName":userName,
-          "passWord":passWord
-        })
-      }
-    ).then((response)=>{
-      // エラー時
-      if(!response.ok){
-        throw new error("error!");
-      }else{
-        return response.json()
-      }
-    }).then(json=>{
-      
-
-
-      // ログイン成功時
-      // sessionはflaskで設定済
-      if(json.isRight){
-
-        // ページ遷移
-
-        return;
-      }else{
-        setError({"notMatchedError":"ユーザー名またはパスワードが違います"})
-      }
-      
-    }).catch(error=>{
-      console.log(error.notMatchedError)
-    })
-  },[fetchOK])
-
+  // ここでjsonに値がセットされ、tokenが定義される。
+  // 登録済ユーザーはfetchの際にチェック（その間の更新に対応）
+  DefaultSetting(setToken,setEnvType,navigate)
 
 
   return(

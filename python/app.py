@@ -1,4 +1,5 @@
-from flask import Flask, send_from_directory,jsonify, request,session
+from flask import Flask, send_from_directory,session,jsonify, request
+from flask_session import Session
 # jsxからのアクセスを許可する
 from flask_cors import CORS
 # flaskのcsrf対策
@@ -19,6 +20,7 @@ from classes.auth.post import AuthPost
 from classes.error_sets.custom_error import InvalidColumnError,SqlError
 from classes.error_sets.error_process import ErrorProcess
 import bcrypt
+import os
 
 app=Flask(__name__,static_folder="../react_app/build")
 CORS(app)
@@ -26,8 +28,11 @@ CORS(app)
 #  設定のインポート
 app.config.from_object(Config)
 
-# # sessionのためのsecretkeyの作成
+# sessionのためのsecretkeyの作成(csrfに使用)
 app.secret_key=app.config["SESSION_SECRET_KEY"]
+
+
+Session(app)  # Flask-Session の初期化
 
 # csrfトークンの作成
 csrf=CSRFProtect(app)
@@ -44,14 +49,42 @@ def whenCSRFError(e):
 
 
 # 全体のページのルーティング
-@app.route("/",defaults={"path":"index"})
-def catch_all(path):
-  return send_from_directory(app.static_folder,"index.html")
+# これは本番環境のnpm run buildで必要
+# @app.route("/",defaults={"path":"index"})
+# def catch_all(path):
+#   # 一律でindex.htmlへ
+#   return send_from_directory(app.static_folder,"index.html")
+
+
+# ログインの確認ルート
+@app.route("/auth/loginSessionCheck")
+@csrf.exempt
+def sessionCheck():
+
+  # sessionにusernameがある場合
+  if("userName" in session):
+    # 現在のuserNameの取得
+    now_user = session.get("userName")
+    # 全てのsessionを1度消す
+    session.clear()
+    # sessionのidの変更（ハイジャック防止）
+    session['session_id'] = os.urandom(16).hex()
+    # 新たなユーザーネームの作成
+    session["userName"]=now_user
+    return jsonify({
+      "loginOk":True,
+      "loginname":session.get("userName")
+      })
+  else:
+    session.clear()
+    return jsonify({
+      "loginOk":False
+    })
+    
 
 # ログインのルート(表示)
 @app.route("/auth/login")
 def loginView():
-  print("a")
   return jsonify({"a":"a"})
 
 # ログインのルート(初期変数=CSRF)受け渡し
@@ -66,60 +99,71 @@ def loginFirstSetting():
   # 不正なアクセスエラーをjsonで返す！
   if not fromURL or not fromURL=="auth/login" or not default_pass == app.config["DEFAULT_PASS"]:
     return jsonify({"error":"不正なアクセスです"}),400
-  
-  # トークンを渡す
-  token = generate_csrf()
-  print(token)
+
+  # tokenの作成
+  token=generate_csrf()
+
+  # 登録されている全ユーザーを返す
+  sql=Sql()
+  authRead=AuthRead(sql)
+  existedUsers=authRead.getAllUsers()
 
   # 返す
   return jsonify({
     "token":token,
-    "existedUser":["a","b","c"]
-    })
+    "env_type":app.config["ENV_TYPE"],
+    "existedUsers":existedUsers
+  })
 
 # ログインのルート(送信)
 @app.route("/api/auth/login",methods=["POST"])
 def loginPost():
   postData=request.get_json()
   sql=Sql()
-  post=AuthPost(sql)
+  read=AuthRead(sql)
+  post=AuthPost(sql,read)
   # 存在と一致の確認
-  isOk=post.check_login(postData.userName,postData.passWord)
+  isOk=post.check_login(postData["userName"],postData["passWord"],app)
+
+  if(isOk):
+    session["userName"]=postData["userName"]
   # 正否の返却
-  return jsonify({"isOk":isOk})
+  return jsonify({"loginOk":isOk})
 
 
-# 新規作成のルート(表示)
-@app.route("/auth/register")
-def registerView():
-  print("a")
-  return jsonify({"a":"a"})
-
+# ログアウトのルート
+@app.route("/api/auth/logout")
+def logout():
+  # 直接の時も同様にこれ
+  session.pop("userName",None)
+  return jsonify({
+    "logoutOk":"ok"
+  })
 
 # 新規作成のルート(初期設定)
 @app.route("/api/auth/register_first_data", methods=["POST"])
 @csrf.exempt
 def registerFirstSetting():
   # トークンを渡す
-  token = generate_csrf()
-
+  token = generate_csrf()  
   # 返す
   return jsonify({
     "token":token,
-    "existedUser":["a","b","c"]
-    })
+    "env_type":app.config["ENV_TYPE"]
+  })
 
 
 # 新規作成のルート(送信)
 @app.route("/api/auth/register", methods=["POST"])
 def registerPost():
+
   postData=request.get_json()
   sql=Sql()
   read=AuthRead(sql)
   post=AuthPost(sql,read)
-  # 成功/失敗何もメッセージを返す
+  # 成功しても失敗してもいずれもメッセージを返す
   message=post.store(postData["userName"],postData["passWord"])
-  print(message)
+
   return jsonify({"message":message})
 
 
@@ -158,9 +202,11 @@ def get_data_forAPI():
   sql=Sql()
   # トークンを渡す
   token = generate_csrf()
-     # これまでのデータ取得
-  existedAuthors = {i: value[0] for i, value in enumerate(MySelectForm.author_choices)}
-  existedSources = {i: value[0] for i, value in enumerate(MySelectForm.source_choices)}
+  myselectForm=MySelectForm(session.get("userName"))
+
+  # これまでのデータ取得
+  existedAuthors = {i: value[0] for i, value in enumerate(myselectForm._authors_choices)}  
+  existedSources = {i: value[0] for i, value in enumerate(myselectForm._sources_choices)}
 
   # sql終了
   sql.close_process()
@@ -170,6 +216,7 @@ def get_data_forAPI():
     "isIndex":True,
     "authors":existedAuthors,
     "sources":existedSources,
+    "userName":session.get("userName"),
     "env_type":app.config["ENV_TYPE"]
     })
 
@@ -188,7 +235,6 @@ def when_post():
   read=Read(sql)
   post=Post(sql)
   jpn=Ginza()
-  selectFormSets=MySelectForm()
   process=Process(jpn,read,post)
 
   # データの受け取り
@@ -237,7 +283,7 @@ def detail_view():
   # tokenの設定
   token = generate_csrf()
 
-  defaultData={**process.get_detail_defaults(),"token":token,"env_type":app.config["ENV_TYPE"]}
+  defaultData={**process.get_detail_defaults(session.get("userName")),"userName":session.get("userName"),"token":token,"env_type":app.config["ENV_TYPE"]}
 
   return jsonify(defaultData)
 

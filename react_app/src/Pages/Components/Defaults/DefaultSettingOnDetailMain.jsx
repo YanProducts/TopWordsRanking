@@ -1,5 +1,5 @@
 import React from "react";
-import { DefaultSettingProcess } from "../Commons/DefaultSettingProcess";
+import { DefaultSettingProcess } from "./DefaultSettingProcess";
 
 export default function DefaultSetting(errorState,setErrorState,defaults,setDefaults,optionSets,setOptionSets,navigate){
 

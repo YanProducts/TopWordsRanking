@@ -1,162 +1,29 @@
 import { Helmet, HelmetProvider } from 'react-helmet-async'
 import React from 'react';
 import { Link,useNavigate  } from 'react-router-dom';
-import DefaultSetting from '../Components/Detail/DefaultSetting';
-import onSelectChange from '../Components/Detail/OnSelectChange';
+import DefaultSetting from '../Components/Defaults/DefaultSettingOnDetailMain';
+import onSelectChange from '../Components/PageParts/DetailParts/OnSelectChange';
 import DetailMainPostFetch from '../Components/Fetch/DetailMainPostFetch';
-import { SelectSets } from '../Components/Detail/SelectSets';
-import defaultDayChange from '../Components/Detail/DefaultDayChange';
+import { SelectSets } from '../Components/PageParts/DetailParts/SelectSets';
+import DetailMainDefinition from '../Components/BaseDefinition/DetailMainDefinition';
+import DetailMainEffects from '../Components/BaseDefinition/Effects/DetailMainEffects'
+
+import defaultDayChange from '../Components/PageParts/DetailParts/DefaultDayChange';
 
 export default function DetailMain(){
-   // ページ遷移用
-    const navigate=useNavigate();
 
-    // 初期ページのためのエラーセット
-    const [errorState,setErrorState]=React.useState({
-      "outURL":"",
-      "type":"",
-    });
-
-    // post時のエラーセッティング
-    const [postError,setPostError]=React.useState({
-      // "validationError":{},
-      // "otherErrors":""
-    });
-
-      // エラーページ用のCSS
-  // アニメーション
-  const [disappearAnimate,setDisappearAnimate]=React.useState("");
-
-  // エラーページ。バリデーション後に投稿されたことを考え、1回ずつリセットする
-  React.useEffect(()=>{
-    if(Object.keys(postError).length===0){
-      return;
-    }
-    // まずはanimateをセット
-    setDisappearAnimate("animate-disappear")
-    // animateが3秒後に空白になるようにする
-    setTimeout(
-      ()=>{
-        setDisappearAnimate("hidden h-0 my-0")
-      }
-      ,3000
-    )
-  },[postError])
-
-  // tokenやisLocalなどのdefaults
-  const [defaults,setDefaults]=React.useState({});
-    
-  // 筆者・媒体の選択決定
-  const [searchValue,setSearchValue]=React.useState({"author":"","source":""});
-
-  // 時期の候補の選択決定
-  const [searchTime,setSearchTime]=React.useState({
-    "startYear":"","startMonth":"","startDay":"","endYear":"","endMonth":"","endDay":"",   
-  });
-
-  // 初期optionのセッティング
-  const [optionSets,setOptionSets]=React.useState({
-    "authors":[],"sources":[],"startYears":[],"startMonths":[],"startDays":[],"endYears":[],"endMonths":[],"endDays":[]
-  })
-
-  // 月日の表示が変わった時に選択するインデックス
-  const [updateSelectedIndex,setUpdateSelectedIndex]=React.useState({});
-
-
-// 初期設定の反映
-  const selectRefs = {
-    author: React.useRef(null),
-    source: React.useRef(null),
-    startYear: React.useRef(null),
-    startMonth: React.useRef(null),
-    startDay: React.useRef(null),
-    endYear: React.useRef(null),
-    endMonth: React.useRef(null),
-    endDay: React.useRef(null),
-  };
-
-  // 最初のレンダリングか否か（optionのセット）
-  const [isFirstFinish,setIsFirstFinish]=React.useState(true);
+  const {navigate,errorState,setErrorState,postError,setPostError,disappearAnimate,setDisappearAnimate,defaults,setDefaults,searchValue,setSearchValue,searchTime,setSearchTime,optionSets,setOptionSets,updateSelectedIndex,setUpdateSelectedIndex,selectRefs,isFirstFinish,setIsFirstFinish}=DetailMainDefinition();
 
   // 初期登録(内部でeffectを呼び出し。optionとtokenをセット)
   DefaultSetting(errorState,setErrorState, defaults,setDefaults,optionSets,setOptionSets,navigate)
 
-  React.useEffect(()=>{
-    // 初回かつoptionSetsがセットされた後のみ
-    if(isFirstFinish && optionSets.startYears.length>0){
-      const date=new Date();
-      (selectRefs.author).current.selectedIndex=0;
-      (selectRefs.source).current.selectedIndex=0;
-      (selectRefs.startYear).current.selectedIndex=0;
-      (selectRefs.startMonth).current.selectedIndex=0;
-      (selectRefs.startDay).current.selectedIndex=0;
-      (selectRefs.endYear).current.selectedIndex=optionSets.endYears.length-1;
-      (selectRefs.endMonth).current.selectedIndex=date.getMonth()-1+1;
-      (selectRefs.endDay).current.selectedIndex=date.getDate()-1;
-        setSearchTime(prevState=>({
-          ...prevState,
-          "startYear":optionSets.startYears[0],
-          "startMonth":1,
-          "startDay":1,
-          "endYear":optionSets.endYears[optionSets.endYears.length-1],
-          "endMonth":date.getMonth()+1,
-          "endDay":date.getDate()
-        }))
-        setIsFirstFinish(false);
-    }
-  },[optionSets])
-
+  // useEffectの定義
+  {DetailMainEffects(postError,setDisappearAnimate,isFirstFinish,optionSets,selectRefs,setSearchTime,setIsFirstFinish,updateSelectedIndex,searchTime,defaultDayChange,setOptionSets)}
   
   // selectが変化した時
   const selectChangeTrigger=React.useCallback((e,type)=>{
     onSelectChange(setSearchValue,searchTime,setSearchTime,optionSets,setOptionSets,updateSelectedIndex,setUpdateSelectedIndex,type,e);
   })
-
-  // 月日の変更に応じて選択されるインデックスが変更されたとき
-  React.useEffect(()=>{
-    // 以下は初回を除く
-    if(updateSelectedIndex.length===0){
-      // 初回も行う
-      defaultDayChange(searchTime,optionSets,setOptionSets,selectRefs)
-      return;
-    }
-
-    // 新たな格納先
-    const newSearchTime={};
-
-    // 新たな格納場所のキーが存在するもののみ、新しい選択場所に格納
-    const newTimeStoreFunction=async()=>{
-      await Promise.all(Object.keys(updateSelectedIndex).map((optionName)=>{
-
-        // 変更前の場合のエラー防止
-        if(optionSets[optionName].length-1<updateSelectedIndex[optionName]){
-          return;
-        }
-  
-        // searchTimeの元の値
-        newSearchTime[optionName]=(optionSets[optionName][updateSelectedIndex[optionName]]);
-
-        const optionNameWithoutS=optionName.substring(0,optionName.length-1);
-        
-        // 選択先の変更
-        selectRefs[optionNameWithoutS].current.selectedIndex=updateSelectedIndex[optionName];
-      }))
-
-      //CalculateTimeViewingで設定された値を反映 
-      await setSearchTime(prevState=>({
-        ...prevState,
-        newSearchTime
-      }));
-
-      defaultDayChange(searchTime,optionSets,setOptionSets,selectRefs)
-
-    }
-    
-    newTimeStoreFunction();
-
-  // optionSetsとupdateSelectedIndexのどちらが先に来るかにより処理が変わるため、両方が変更された時に合わせる
-  },[optionSets,updateSelectedIndex])
-
 
   return(
     <>

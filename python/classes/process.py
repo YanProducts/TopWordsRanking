@@ -17,25 +17,26 @@ class Process:
     sentsbase=request.get("request_sentences")
     author=request.get("request_author")
     source=request.get("request_source")
+    userName=request.get("request_userName")
 
     # 解析
     sents=self._jpn.jpn_analyze(sentsbase)
 
     # 解析した言葉を格納
-    self._post.insert_words(sents,author,source)
+    self._post.insert_words(sents,author,source,userName)
 
     # データ挿入後のランキングを返す
-    return (sentsbase,author,source,self._read.get_rank("words"),sents)
+    return (sentsbase,author,source,self._read.get_rank("words",userName),sents)
       
 
         # 詳細データを返す処理
-  def get_detail_defaults(self):
+  def get_detail_defaults(self,userName):
 
       # 筆者
-      authors_choices=[r["author"] for r in self._read.get_rank("author")]
+      authors_choices=[r["author"] for r in self._read.get_rank("author",userName)]
       
       # 媒体
-      sources_choices=[r["source"] for r in self._read.get_rank("source")]
+      sources_choices=[r["source"] for r in self._read.get_rank("source",userName)]
     
       # 日付(開始も終了も、この段階では同じ)
       default_year_sets=[n for n in range(2020, datetime.now().year+1)]

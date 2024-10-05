@@ -32,26 +32,31 @@ class AuthPost:
     except Exception as e:
       print(e)
       # エラールートへ
-      return "error"
+      return e.args
     finally:
       sql.close_process()
     
   
 # ログインネームとパスワードのチェック
-  def check_login(self,userName,passWord):
+  def check_login(self,userName,passWord,app):
     sql=self._sql
-    # sql接続確認と開始
-    sql.con_exist()
-    sql.open_process()
-    #ハッシュ化されたパスワードを取り出す 
-    sql._cur.execute("select password from py_users where username=%s",(userName))
-    hashedPassWrod=sql._cur.fetchone()
-    # sql終了
-    sql.all_close()
-    # パスワードのデータがない＝ユーザーネームが存在しない
-    if hashedPassWrod is None:
+    try:
+      # sql接続確認と開始
+      sql.con_exist()
+      sql.open_process()
+      #ハッシュ化されたパスワードを取り出す 
+      sql._cur.execute("select password from py_users where username=%s",(userName,))
+      hashedPassWrod=sql._cur.fetchone()
+      # sql終了
+      sql.all_close()
+      # パスワードのデータがない＝ユーザーネームが存在しない
+      if hashedPassWrod is None:
+        return False
+      
+      return bcrypt.checkpw(passWord.encode("UTF-8"), hashedPassWrod[0].encode("UTF-8"))
+    except Exception as e:
+      if app.config["ENV_TYPE"]=="local":
+        print(e)
       return False
-    
-    return bcrypt.checkpw(passWord.encode("UTF-8"), hashedPassWrod[0].encode("UTF-8"))
-
+      
 

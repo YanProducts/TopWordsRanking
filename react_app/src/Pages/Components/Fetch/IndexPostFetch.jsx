@@ -10,7 +10,8 @@ export default function IndexPostFetch(defaults,text,author,source,setError,navi
       body:JSON.stringify({
         "request_sentences":text,
         "request_author":author,
-        "request_source":source
+        "request_source":source,
+        "request_userName":defaults.userName
       })
     }).then((response)=>{
       // 投稿エラー時

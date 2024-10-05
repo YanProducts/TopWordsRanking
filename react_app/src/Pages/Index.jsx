@@ -1,72 +1,24 @@
 import { Helmet, HelmetProvider } from 'react-helmet-async'
 import React from 'react';
 import { Link,useNavigate  } from 'react-router-dom';
-import { ComponentsForPost } from './Components/Index/ForPost';
-import { DefaultSetting } from './Components/Index/DefaultSetting';
+import LoginSessionCheck from './Auth/LoginSessionCheck';
+import { ComponentsForPost } from './Components/PageParts/IndexParts/ForPost';
+import { DefaultSetting } from './Components/Defaults/DefaultSettingOnIndex';
 import IndexPostFetch from './Components/Fetch/IndexPostFetch';
-
+import IndexDefinition from './Components/BaseDefinition/IndexDefinition';
+import IndexAction from './Components/HandleAction/IndexAction';
 
 export default function Index(){
-  // ページ遷移用
-  const navigate=useNavigate();
 
-  // 初期データの設定
-  const [defaults,setDefault]=React.useState({
-    "token":"",
-    "authors":{},
-    "sources":{}
-  });
+  // まずはloginされているかの確認。されていなければ、以下の関数からページをnavigate(ページ内部でuseEffect)
+  LoginSessionCheck("index");
 
-  // 初期optionのセッティング
-  const [authorOptions,setAuthorOptions]=React.useState("");
-  const [sourceOptions,setSourceOptions]=React.useState("");
+  // 定義のセット
+  const {navigate,defaults,setDefaults,authorOptions,setAuthorOptions,sourceOptions,setSourceOptions,error,setError,author,setAuthor,source,setSource,text,setText,AuthorInputRef,SourceInputRef}=IndexDefinition()
 
-  // エラーのhtml表示用
-  const [error,setError]=React.useState({
-    "validationError":{},
-    "otherErrors":""
-  });
+  // ハンドル操作のセット
+  const{onAuthorSelectChange,onSourceSelectChange,onAuthorInputChange,onSourceInputChange,onTextAreaChange,onBtnClick}=IndexAction(setAuthor,setSource,setText,AuthorInputRef,SourceInputRef,IndexPostFetch,defaults,text,author,source,setError,navigate)
 
-  
-  // 投稿の各データ
-  const [author,setAuthor]=React.useState("");
-  const [source,setSource]=React.useState("");
-  const [text,setText]=React.useState("");
-
-  // input要素のref
-  const AuthorInputRef=React.useRef(null);
-  const SourceInputRef=React.useRef(null);
-
-  // 各データのselect要素のチェンジ
-  const onAuthorSelectChange=(e)=>{
-    setAuthor(e.target.value)
-  }
-  const onSourceSelectChange=(e)=>{
-    setSource(e.target.value)
-  }
-
-  // 各データのinput要素のチェンジ
-  const onAuthorInputChange=(e)=>{
-    setAuthor(e.target.value)    
-    AuthorInputRef.current.focus({preventScroll: true })
-   }
-  const onSourceInputChange=(e)=>{
-    setSource(e.target.value)
-    SourceInputRef.current.focus({preventScroll: true })
-    }
-
-  // textareaのチェンジ
-  const onTextAreaChange=(e)=>{
-    setText(e.target.value)
-  }
-
-  // 投稿ボタンが押されたとき
-  const onBtnClick=(e)=>{
-    e.preventDefault();
-    IndexPostFetch(defaults,text,author,source,setError,navigate);    
-  }
-  
-  
 
   return(
     <>
@@ -76,7 +28,7 @@ export default function Index(){
       </Helmet>
 
       {/* 初期ページに格納 */}
-      <DefaultSetting navigate={navigate} defaults={defaults} setDefault={setDefault}setAuthorOptions={setAuthorOptions} setSourceOptions={setSourceOptions}/>
+      <DefaultSetting navigate={navigate} defaults={defaults} setDefaults={setDefaults}setAuthorOptions={setAuthorOptions} setSourceOptions={setSourceOptions}/>
 
         {/* 空白防止用 */}
         <div>　</div>
@@ -100,6 +52,8 @@ export default function Index(){
       />
     
         <p className='base_link_p'>現在のランクは<Link className='base_link' to="/detail/main">こちら</Link></p>
+   
+        <p className='base_link_p'><Link className='base_link' to="/auth/logout">ログアウト</Link></p>
 
         {/* 空白防止用 */}
         <div>　</div>

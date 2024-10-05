@@ -1,5 +1,5 @@
 import React from "react";
-import { DefaultSettingProcess } from "../Commons/DefaultSettingProcess";
+import { DefaultSettingProcess } from "../DefaultSettingProcess";
 
 export default function DefaultSetting(setToken,setExistedUser,navigate){
   // 初期設定で返ってくるjson

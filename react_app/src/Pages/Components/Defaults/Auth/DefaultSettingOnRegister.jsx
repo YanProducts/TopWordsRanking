@@ -1,7 +1,7 @@
 import React from "react";
-import { DefaultSettingProcess } from "../Commons/DefaultSettingProcess";
+import { DefaultSettingProcess } from "../DefaultSettingProcess";
 
-export default function DefaultSetting(setToken,setExistedUser,navigate){
+export default function DefaultSetting(setToken,setEnvType,navigate){
   // 初期設定で返ってくるjson
   const [json,setJson]=React.useState("");
 
@@ -12,7 +12,7 @@ export default function DefaultSetting(setToken,setExistedUser,navigate){
   React.useEffect(()=>{
     if((Object.keys(json)).length>0){
       setToken(json.token);
-      setExistedUser(json.existedUser);
+      setEnvType(json.env_type)
     }
   },[json])
 

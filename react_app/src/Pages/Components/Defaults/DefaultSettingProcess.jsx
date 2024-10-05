@@ -2,8 +2,6 @@ import React from "react";
 
 // 初期値をセットする全体の流れ
 export function DefaultSettingProcess(apiURL,fromURL,errorType,navigate,setJson){
-
-
   // 初期ページのためのエラーセット
   const [errorState,setErrorState]=React.useState({
     "outURL":"",
@@ -13,9 +11,9 @@ export function DefaultSettingProcess(apiURL,fromURL,errorType,navigate,setJson)
   // 過去の投稿におけるsqlデータ変数取得
   React.useEffect(()=>{
     // navigateが未定義の場合は処理を中断
-    if (!navigate) return;
-
-
+    if (!navigate){
+      return;
+    }
     const headers={
       "Content-Type": "application/json"
     }
@@ -30,7 +28,7 @@ export function DefaultSettingProcess(apiURL,fromURL,errorType,navigate,setJson)
         })
       }
     ).then((response)=>{
-      
+
       // 不正アクセスの場合、エラーページへ(遷移のnavigateは遅延を考えuseEffectで定義)
       if(!response.ok){
         setErrorState({"outURL":fromURL,"type":errorType});

@@ -1,4 +1,5 @@
 // 登録の際の条件にあっているか？
+// existedUserは登録のfetch時にチェックした方が、「ページに到達した後の登録」に備えることができる
 export function RegisterPatternCheck(userName,passWord,passWord2,setError,setFetchOK){
   
   const userPtn=/[^A-Za-z0-9]+$/u;
@@ -19,6 +20,8 @@ export function RegisterPatternCheck(userName,passWord,passWord2,setError,setFet
        "userLength":"ユーザー名は3文字以上必須です"
     }
   }
+
+
 
   if(!passWord.match(passPtn)){
     returnedError={
