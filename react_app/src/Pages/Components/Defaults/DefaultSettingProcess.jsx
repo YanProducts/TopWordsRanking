@@ -41,8 +41,8 @@ export function DefaultSettingProcess(apiURL,fromURL,errorType,navigate,setJson)
       setJson(json);
     }).catch((e)=>{
       // エラー時の捕捉
-      console.log(e);
-    })
+      navigate("/error",{state:{"outURL":"/index","type":"データ取得時のエラーです"}});
+   })
   },[navigate])
 
   // 初期設定でのエラーの時のページ遷移

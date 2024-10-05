@@ -27,10 +27,11 @@ export default function LoginSessionCheck(fromURL=""){
       }).then(json=>{
         // jsonのloginOkが存在し、かつtrueの時
         if(json?.loginOk){
-          // すでにindexから来ている時は何も返さない
-          if(fromURL==="index"){
+          // 存在するページから来ている時は何も返さない
+          if(["index","analyze","detailMain","detailResults"].includes(fromURL)){
             return null
           }else{
+            // 「/」からきた場合はindexに表示
             navigate("/index",{
               state:{"loginName":json.loginname}
             });

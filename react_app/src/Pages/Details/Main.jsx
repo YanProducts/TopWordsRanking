@@ -5,17 +5,21 @@ import DefaultSetting from '../Components/Defaults/DefaultSettingOnDetailMain';
 import onSelectChange from '../Components/PageParts/DetailParts/OnSelectChange';
 import DetailMainPostFetch from '../Components/Fetch/DetailMainPostFetch';
 import { SelectSets } from '../Components/PageParts/DetailParts/SelectSets';
+import LoginSessionCheck from '../Auth/LoginSessionCheck';
 import DetailMainDefinition from '../Components/BaseDefinition/DetailMainDefinition';
 import DetailMainEffects from '../Components/BaseDefinition/Effects/DetailMainEffects'
-
 import defaultDayChange from '../Components/PageParts/DetailParts/DefaultDayChange';
 
 export default function DetailMain(){
 
+  // ログイン確認
+  LoginSessionCheck("detailMain")
+
+  // 変数とstateの定義
   const {navigate,errorState,setErrorState,postError,setPostError,disappearAnimate,setDisappearAnimate,defaults,setDefaults,searchValue,setSearchValue,searchTime,setSearchTime,optionSets,setOptionSets,updateSelectedIndex,setUpdateSelectedIndex,selectRefs,isFirstFinish,setIsFirstFinish}=DetailMainDefinition();
 
-  // 初期登録(内部でeffectを呼び出し。optionとtokenをセット)
-  DefaultSetting(errorState,setErrorState, defaults,setDefaults,optionSets,setOptionSets,navigate)
+  // 初期データ取得(内部でeffectを呼び出し。optionとtokenをセット)。空の場合は戻る
+  DefaultSetting(setDefaults,setOptionSets,navigate)
 
   // useEffectの定義
   {DetailMainEffects(postError,setDisappearAnimate,isFirstFinish,optionSets,selectRefs,setSearchTime,setIsFirstFinish,updateSelectedIndex,searchTime,defaultDayChange,setOptionSets)}

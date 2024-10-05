@@ -1,12 +1,22 @@
-import { Link, useLocation} from "react-router-dom";
+import { Link, useLocation,useNavigate} from "react-router-dom";
 import React from "react";
+import LoginSessionCheck from "./Auth/LoginSessionCheck";
 
 
 export default function Analyze(){
 
+  // ログインしていないときは戻る
+  LoginSessionCheck("analyze");  
   // リンク元からデータの受け取り
   const location=useLocation();
-  const postData=location.state.data;
+  
+  // 結果がないときはエラー
+  const navigate=useNavigate()
+  if(!location?.state?.data){
+    navigate("/error",{state:{"outURL":"","type":"データがありません"}});
+  }
+
+  const postData=location.state.data
 
   // 順位表示
   const TdComponent=()=>

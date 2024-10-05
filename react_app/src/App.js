@@ -25,13 +25,13 @@ function App() {
 
             <Route index element={<LoginSessionCheck/>}/>
           
-          
-            <Route path="/index" element={<Index/>}/>
+            {/* ログイン系列 */}
             <Route path="/auth/login" element={<Login/>}/>
             <Route path="/auth/logout" element={<Logout/>}/>
             <Route path="/auth/register" element={<Register/>}/>
             <Route path="/auth/passChange" element={<PassChange/>}/>
 
+            {/* コンテンツ */}
             <Route path="/index" element={<Index/>}/>
             <Route path="/when_post" element={<Analyze/>}/>
             <Route path="/detail/main" element={<DetailMain/>}/>

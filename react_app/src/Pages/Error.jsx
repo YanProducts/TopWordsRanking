@@ -23,7 +23,7 @@ export default function ShowErrorPage(props){
      return null;
     }  
    return(
-      <p><Link to="/index">戻る</Link></p>
+      <p className="base_link_p text-blue-700 font-bold underline cursor-pointer"><Link to="/index">戻る</Link></p>
     )
    }
 
@@ -33,7 +33,8 @@ export default function ShowErrorPage(props){
     <HelmetProvider>
       <Helmet><title>エラーのお知らせ</title></Helmet>
         <div>　</div>
-        <h1 className="base_h base_h1 my-20 p-10">{errorType}</h1>
+        <h2 className="base_h text-2xl mt-10 mb-5 p-5">エラーのお知らせ</h2>
+        <h1 className="base_h base_h1 mt-5 mb-5 p-10 text-red-500">{errorType}</h1>
         <BackComponent/>
     </HelmetProvider>
     </>

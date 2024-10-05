@@ -51,7 +51,9 @@ export default function Index(){
         onBtnClick={onBtnClick}
       />
     
-        <p className='base_link_p'>現在のランクは<Link className='base_link' to="/detail/main">こちら</Link></p>
+
+        {(Object.keys(defaults.authors).length!==0 && Object.keys(defaults.sources).length!==0) ? <p className='base_link_p'>現在のランクは<Link className='base_link' to="/detail/main">こちら</Link></p>
+        : null}
    
         <p className='base_link_p'><Link className='base_link' to="/auth/logout">ログアウト</Link></p>
 
