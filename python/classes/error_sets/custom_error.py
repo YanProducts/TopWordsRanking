@@ -1,4 +1,7 @@
 # カスタム定義のエラー
+# Reactにjsonで返すべき！！！！
+
+
 
 # カラムの定義が違う時
 class InvalidColumnError(Exception):

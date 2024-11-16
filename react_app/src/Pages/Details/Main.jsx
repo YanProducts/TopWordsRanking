@@ -1,13 +1,13 @@
 import { Helmet, HelmetProvider } from 'react-helmet-async'
 import React from 'react';
 import { Link,useNavigate  } from 'react-router-dom';
-import DefaultSetting from '../Components/Defaults/DefaultSettingOnDetailMain';
+import DefaultSetting from '../Components/Defaults/Pages/DefaultSettingOnDetailMain';
 import onSelectChange from '../Components/PageParts/DetailParts/OnSelectChange';
 import DetailMainPostFetch from '../Components/Fetch/DetailMainPostFetch';
 import { SelectSets } from '../Components/PageParts/DetailParts/SelectSets';
 import LoginSessionCheck from '../Auth/LoginSessionCheck';
 import DetailMainDefinition from '../Components/BaseDefinition/DetailMainDefinition';
-import DetailMainEffects from '../Components/BaseDefinition/Effects/DetailMainEffects'
+import DetailMainEffects from '../Components/Effects/DetailMainEffects'
 import defaultDayChange from '../Components/PageParts/DetailParts/DefaultDayChange';
 
 export default function DetailMain(){

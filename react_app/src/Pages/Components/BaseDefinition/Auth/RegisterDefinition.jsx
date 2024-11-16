@@ -2,6 +2,10 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 export default function RegisterDefinition(){
+    // URL設定(定数)
+    const apiURL="/api/auth/register_first_data";
+    const fromURL="auth/register";
+
     // ページ遷移用
     const navigate=useNavigate();
 
@@ -24,9 +28,10 @@ export default function RegisterDefinition(){
 
   // エラーのcssの値
   const [errorCss,setErrorCss]=React.useState("");
+  const [errorCss2,setErrorCss2]=React.useState("");
 
   // fetchに渡しても良いかの確認
   const [fetchOK,setFetchOK]=React.useState(false);
   
-  return{navigate,userName,setUserName,passWord,setPassWord,passWord2,setPassWord2,userNameRef,passWordRef,passWordRef2,token,setToken,envType,setEnvType,error,setError,errorCss,setErrorCss,fetchOK,setFetchOK}  
+  return{apiURL,fromURL,navigate,userName,setUserName,passWord,setPassWord,passWord2,setPassWord2,userNameRef,passWordRef,passWordRef2,token,setToken,envType,setEnvType,error,setError,errorCss,setErrorCss,errorCss2,setErrorCss2,fetchOK,setFetchOK}  
 }

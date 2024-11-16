@@ -1,4 +1,6 @@
 import { Navigate, useNavigate } from "react-router-dom"
+import React from "react"
+
 // ログアウト時(flaskでsessionを切った後で初期ページへ)
 export default function Logout(){
   const navigate=useNavigate()

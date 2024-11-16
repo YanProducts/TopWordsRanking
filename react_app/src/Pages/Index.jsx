@@ -3,7 +3,7 @@ import React from 'react';
 import { Link,useNavigate  } from 'react-router-dom';
 import LoginSessionCheck from './Auth/LoginSessionCheck';
 import { ComponentsForPost } from './Components/PageParts/IndexParts/ForPost';
-import { DefaultSetting } from './Components/Defaults/DefaultSettingOnIndex';
+import { DefaultSetting } from './Components/Defaults/Pages/DefaultSettingOnIndex';
 import IndexPostFetch from './Components/Fetch/IndexPostFetch';
 import IndexDefinition from './Components/BaseDefinition/IndexDefinition';
 import IndexAction from './Components/HandleAction/IndexAction';
@@ -32,7 +32,8 @@ export default function Index(){
 
         {/* 空白防止用 */}
         <div>　</div>
-        <h1 className="base_h1">よく使う言葉リスト！</h1>
+        <h1 className="base_h1 mb-3 py-1">よく使う言葉リスト！</h1>
+        <div className="base_backColor base_frame text-center w-2/5 min-w-[300] sm:mb-8 mb-6 font-bold">ログイン名:{defaults.userName}さん</div>
 
       <ComponentsForPost
         error={error}

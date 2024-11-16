@@ -12,32 +12,38 @@ export default function Analyze(){
   
   // 結果がないときはエラー
   const navigate=useNavigate()
-  if(!location?.state?.data){
-    navigate("/error",{state:{"outURL":"","type":"データがありません"}});
+
+  React.useEffect(()=>{
+    if(!location?.state?.data){
+      navigate("/error",{state:{"outURL":"","type":"データがありません"}});
+    }
+  },[location]);
+
+  const postData=location?.state?.data || null;
+  // useEffectは全ての処理が終わってからではないと実行されないため、postDataがnullの場合はひとまず処理を行う（実際には表示されない）。
+  if(postData==null){
+    return(<div>まだ投稿はありません</div>)
   }
 
-  const postData=location.state.data
 
   // 順位表示
   const TdComponent=()=>
-      postData.rank.map((eachData)=>{
-        // 50位以下は省く
-        if(Number(eachData.number)>50){
-          return null;
-        }
+    postData.rank.map((eachData)=>{
+      // 50位以下は省く
+      if(Number(eachData.number)>50){
+        return null;
+      }
 
-        return(
-          // 今回の投稿がランクに含まれていたら色を変更
-          <tr key={eachData.id} className={postData.now_ginza_sets.includes(eachData.words) ? "bg-yellow-100":"" }>
-            <td className="base_td_notRightEnd">{eachData.number}</td>
-            <td className="base_td_notRightEnd">{eachData.c}</td>
-            <td className="base_td_rightEnd">{eachData.words}</td>
-          </tr>
-        );
-      });
+      return(
+        // 今回の投稿がランクに含まれていたら色を変更
+        <tr key={eachData.id} className={postData.now_ginza_sets.includes(eachData.words) ? "bg-yellow-100":"" }>
+          <td className="base_td_notRightEnd">{eachData.number}</td>
+          <td className="base_td_notRightEnd">{eachData.c}</td>
+          <td className="base_td_rightEnd">{eachData.words}</td>
+        </tr>
+      );
+  });
   
-
-
   return(
     <>
       <div className="base_frame">

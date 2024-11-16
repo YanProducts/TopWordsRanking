@@ -2,6 +2,11 @@
 import React from "react";
 import {useNavigate} from 'react-router-dom';
 export default function LoginDefinition(){
+
+    // URL設定(定数)
+    const apiURL="/api/auth/login_first_data";
+    const fromURL="/auth/login";
+
     // ページ遷移用
     const navigate=useNavigate();
 
@@ -17,6 +22,8 @@ export default function LoginDefinition(){
     // tokenと既存ユーザー
     const [token,setToken]=React.useState("")
     const [existedUser,setExistedUser]=React.useState([""])
+    // ローカルか否か
+    const [envType,setEnvType]=React.useState("REAL");
   
     
     // エラーのhtml表示用
@@ -26,5 +33,6 @@ export default function LoginDefinition(){
     // エラーのcssの値
     const [errorCss,setErrorCss]=React.useState("");
 
-    return{navigate,userName,setUserName,passWord,setPassWord,userNameRef,passWordRef,checkValue,setCheckValue,token,setToken,existedUser,setExistedUser,error,setError,errorCss,setErrorCss}
+
+    return{apiURL,fromURL,navigate,userName,setUserName,passWord,setPassWord,userNameRef,passWordRef,checkValue,setCheckValue,token,setToken,existedUser,setExistedUser,error,setError,errorCss,setErrorCss,envType,setEnvType}
 }

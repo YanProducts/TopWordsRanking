@@ -9,7 +9,8 @@ import DetailResult from './Pages/Details/Result';
 import Login from "./Pages/Auth/Login";
 import Logout from "./Pages/Auth/Logout";
 import Register from "./Pages/Auth/Register";
-import PassChange from "./Pages/Auth/PassChange";
+import DataChange from "./Pages/Auth/DataChange";
+import DataChangeDecide from "./Pages/Auth/DataChangeDecide";
 import Sign from "./Pages/Sing";
 import ShowErrorPage from "./Pages/Error";
 import NotFoundPage from './Pages/NotFoundPage';
@@ -29,7 +30,8 @@ function App() {
             <Route path="/auth/login" element={<Login/>}/>
             <Route path="/auth/logout" element={<Logout/>}/>
             <Route path="/auth/register" element={<Register/>}/>
-            <Route path="/auth/passChange" element={<PassChange/>}/>
+            <Route path="/auth/data_change" element={<DataChange/>}/>
+            <Route path="/auth/data_change_decide" element={<DataChangeDecide/>}/>
 
             {/* コンテンツ */}
             <Route path="/index" element={<Index/>}/>

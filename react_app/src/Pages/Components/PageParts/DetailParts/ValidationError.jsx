@@ -1,6 +1,6 @@
 
 
-export default function validationError(what,postError,disappearAnimate){
+export default function ValidationError(what,postError,disappearAnimate){
 
   if(!postError?.validationError){
     return null

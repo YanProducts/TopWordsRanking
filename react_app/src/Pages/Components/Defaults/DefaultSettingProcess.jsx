@@ -1,12 +1,11 @@
 import React from "react";
 
-// 初期値をセットする全体の流れ
-export function DefaultSettingProcess(apiURL,fromURL,errorType,navigate,setJson){
-  // 初期ページのためのエラーセット
-  const [errorState,setErrorState]=React.useState({
-    "outURL":"",
-    "type":""
-  });
+export default function DefaultSettingProcess(apiURL,fromURL,message,navigate,setJson){
+    // 初期ページのためのエラーセット
+    const [errorState,setErrorState]=React.useState({
+      "outURL":"",
+      "type":""
+    });
 
   // 過去の投稿におけるsqlデータ変数取得
   React.useEffect(()=>{
@@ -28,10 +27,8 @@ export function DefaultSettingProcess(apiURL,fromURL,errorType,navigate,setJson)
         })
       }
     ).then((response)=>{
-
       // 不正アクセスの場合、エラーページへ(遷移のnavigateは遅延を考えuseEffectで定義)
       if(!response.ok){
-        setErrorState({"outURL":fromURL,"type":errorType});
         throw new Error(response.json());
       }else{
        return response.json();
@@ -41,16 +38,19 @@ export function DefaultSettingProcess(apiURL,fromURL,errorType,navigate,setJson)
       setJson(json);
     }).catch((e)=>{
       // エラー時の捕捉
-      navigate("/error",{state:{"outURL":"/index","type":"データ取得時のエラーです"}});
+      setErrorState({"outURL":fromURL,"type":message});
    })
   },[navigate])
 
   // 初期設定でのエラーの時のページ遷移
   React.useEffect(()=>{
     if(errorState.outURL!==""){
+      // エラーページへ
       navigate("/error",{state:errorState});
+      // 念の為変数を戻す
       setErrorState({"outURL":"","type":""});
     }
   },[errorState])
 
 }
+

@@ -31,7 +31,7 @@ export default function IndexDefinition(){
   
     // input要素のref
     const AuthorInputRef=React.useRef(null);
-    const SourceInputRef=React.useRef(null);
+    const SourceInputRef=React.useRef(null);    
 
     return{
       navigate,defaults,setDefaults,authorOptions,setAuthorOptions,sourceOptions,setSourceOptions,error,setError,author,setAuthor,source,setSource,text,setText,AuthorInputRef,SourceInputRef

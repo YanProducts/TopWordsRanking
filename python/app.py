@@ -17,6 +17,7 @@ from classes.post import Post
 from classes.check import Check
 from classes.auth.read import AuthRead
 from classes.auth.post import AuthPost
+from classes.auth.patch import AuthPatch
 from classes.error_sets.custom_error import InvalidColumnError,SqlError
 from classes.error_sets.error_process import ErrorProcess
 import bcrypt
@@ -31,12 +32,12 @@ app.config.from_object(Config)
 # sessionのためのsecretkeyの作成(csrfに使用)
 app.secret_key=app.config["SESSION_SECRET_KEY"]
 
-
 Session(app)  # Flask-Session の初期化
 
 # csrfトークンの作成
 csrf=CSRFProtect(app)
 csrf.init_app(app)
+
 # CSRFトークンアウトの際の処理
 @app.errorhandler(CSRFError)
 def whenCSRFError(e):
@@ -60,32 +61,17 @@ def whenCSRFError(e):
 @app.route("/auth/loginSessionCheck")
 @csrf.exempt
 def sessionCheck():
-
-  # sessionにusernameがある場合
-  if("userName" in session):
-    # 現在のuserNameの取得
-    now_user = session.get("userName")
-    # 全てのsessionを1度消す
-    session.clear()
-    # sessionのidの変更（ハイジャック防止）
-    session['session_id'] = os.urandom(16).hex()
-    # 新たなユーザーネームの作成
-    session["userName"]=now_user
-    return jsonify({
-      "loginOk":True,
-      "loginname":session.get("userName")
-      })
+  sql=Sql()
+  authRead=AuthRead(sql)
+  if not authRead.userExistsCheck(session):
+         return jsonify({
+            "loginOk":False
+         })
   else:
-    session.clear()
-    return jsonify({
-      "loginOk":False
-    })
-    
-
-# ログインのルート(表示)
-@app.route("/auth/login")
-def loginView():
-  return jsonify({"a":"a"})
+        return jsonify({
+          "loginOk":True,
+          "loginname":session.get("userName")
+          })
 
 # ログインのルート(初期変数=CSRF)受け渡し
 @app.route("/api/auth/login_first_data",methods=["POST"])
@@ -96,8 +82,9 @@ def loginFirstSetting():
   # 不正なアクセス対策
   default_pass=default_data.get("defaultPass")
   fromURL=default_data.get("fromURL")  # ユーザーネームのリスト
+
   # 不正なアクセスエラーをjsonで返す！
-  if not fromURL or not fromURL=="auth/login" or not default_pass == app.config["DEFAULT_PASS"]:
+  if not fromURL or not fromURL=="/auth/login" or default_pass != app.config["DEFAULT_PASS"]:
     return jsonify({"error":"不正なアクセスです"}),400
 
   # tokenの作成
@@ -124,8 +111,8 @@ def loginPost():
   post=AuthPost(sql,read)
   # 存在と一致の確認
   isOk=post.check_login(postData["userName"],postData["passWord"],app)
-
   if(isOk):
+    # sessionの登録
     session["userName"]=postData["userName"]
   # 正否の返却
   return jsonify({"loginOk":isOk})
@@ -167,18 +154,62 @@ def registerPost():
   return jsonify({"message":message})
 
 
+# 登録内容変更初期設定
+@app.route("/api/auth/dataChange_first_data",methods=["POST"])
+@csrf.exempt
+def dataChangeFirstSetting():
+  data=request.get_json()
+  if not data.get("fromURL") or data.get("fromURL") != "/auth/dataChange":
+    return jsonify({"error":"不正なアクセスです"}),400
+  # トークンを渡す
+  token = generate_csrf()  
+  return jsonify(
+    {
+      "token":token,
+      "env_type":app.config["ENV_TYPE"]
+      }
+  )
 
-# パスワードチェンジのルート(表示)
-@app.route("/auth/passchange")
-def passChangeView():
-  print("a")
-  return jsonify({"a":"a"})
+# 登録内容変更：以前の登録者チェック
+@app.route("/api/auth/dataChangeRegisterCheck",methods=["POST"])
+def registerCheck():
+  postData=request.get_json()
+  sql=Sql()
+  read=AuthRead(sql)
+  post=AuthPost(sql,read)
+  isOk=post.check_login(postData["userName"],postData["passWord"],app)
+  return jsonify({
+    "isOk":isOk
+  })
 
-# パスワードチェンジのルート(送信)
-@app.route("/api/auth/passchange", methods=["POST"])
-def passChangePost():
-  print("a")
-  return jsonify({"a":"a"})
+
+
+# 登録内容変更送信
+@app.route("/api/auth/dataChange", methods=["POST"])
+def dataChangePost():
+  postData=request.get_json()
+  sql=Sql()
+  read=AuthRead(sql)
+  post=AuthPost(sql,read)
+  patch=AuthPatch(sql,read,post)
+  # 既に新規入力項目の条件はブラウザ側で設定済み
+
+  # キーの取得(ない場合はエラー)
+  keys=["choice","oldUserName","oldPassWord","newLoginField"]
+  try:
+    choice,oldUserName,oldPassWord,newLoginField=(postData[key] for key in keys)
+  except:
+    return jsonify({"message":"keyError"})
+  print(choice)
+  # 登録内容変更のプロセス
+  if choice=="userName":
+    message=patch.update_userName(oldUserName,oldPassWord,newLoginField,app)
+  elif choice=="passWord":
+    message=patch.update_passWord(oldUserName,oldPassWord,newLoginField,app)
+  else:
+    message="choiceValueError"
+  print(message)
+  return jsonify({"message":message});
 
 
 # 初期段階での変数設定。jsx側からfetchで行われる
@@ -221,12 +252,9 @@ def get_data_forAPI():
     })
 
 
-
-
 # ポスト時(fetchで操作)
 @app.route("/api/post_data",methods=["POST"])
 def when_post():
-
 
   # tokenの検証とバリデーションは必要
 
